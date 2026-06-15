@@ -4,10 +4,12 @@
     "./skills/agentic-commerce/readiness-audit",
     "./skills/agentic-commerce/seo-aeo-geo-audit",
     "./skills/agentic-commerce/agent-readiness",
+    "./skills/agentic-commerce/commerce-protocol-readiness",
     "./skills/agentic-commerce/product-knowledge-gap-analysis",
     "./skills/agentic-commerce/llms-txt-and-crawler-access",
     "./skills/agentic-commerce/ecommerce-policy-readiness",
     "./skills/agentic-commerce/custom-agent-remediation-plan",
-    "./skills/agentic-commerce/fde-opportunity-map"
+    "./skills/agentic-commerce/fde-opportunity-map",
+    "./skills/agentic-commerce/skills-marketplace-readiness"
   ]
 }
