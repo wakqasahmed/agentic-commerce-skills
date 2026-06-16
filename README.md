@@ -1,15 +1,14 @@
 # Agentic Commerce Skills [![skills.sh](https://skills.sh/b/wakqasahmed/agentic-commerce-skills)](https://skills.sh/wakqasahmed/agentic-commerce-skills)
 
-Practical agent skills for ecommerce teams that want their stores to be discoverable, readable, citable, and transactable by AI agents.
+Practical agent skills for ecommerce teams preparing for AI-mediated discovery, answers, recommendations, checkout, support, and automation.
 
-Use this repo when you want an AI coding agent to audit or improve a storefront for Agentic Commerce, SEO, AEO, GEO, AI crawler access, product knowledge quality, policy clarity, and commerce protocol readiness.
+AI agents do not browse stores like humans. They fetch, parse, summarize, compare, cite, and increasingly act. This skill pack helps you check whether an ecommerce storefront is discoverable, readable, citable, and ready for agentic commerce workflows.
 
 ## Who This Is For
 
 - Ecommerce founders checking whether their store is AI-ready.
-- Developers adding AI crawler, `llms.txt`, schema, MCP, ACP, UCP, x402, or checkout readiness work.
-- Agencies and consultants producing AI search and Agentic Commerce audits.
-- AIOpsome workflows that turn a free audit into a custom ecommerce agent or deeper FDE engagement.
+- Developers improving crawler access, product data, schema, `llms.txt`, MCP, ACP, UCP, x402, or checkout readiness.
+- Agencies and consultants producing AI search, AEO, GEO, and Agentic Commerce audits.
 
 ## Install
 
@@ -25,6 +24,17 @@ Local Claude CLI fallback:
 scripts/list-skills.sh
 scripts/link-skills.sh
 ```
+
+## What This Helps You Find
+
+- AI crawler or robots.txt blocks.
+- Missing sitemap, llms.txt, link headers, or agent-facing discovery signals.
+- Weak product titles, descriptions, variants, prices, availability, images, or attributes.
+- Missing structured data for products, offers, FAQs, policies, and organization context.
+- Product and policy gaps that stop agents from answering confidently.
+- Unclear shipping, returns, refunds, warranty, support, or escalation paths.
+- Checkout and order-flow gaps that block agent-assisted commerce.
+- Protocol readiness gaps across ACP, UCP, x402, MCP, A2A, OAuth, payment, checkout, and order workflows.
 
 ## Skills
 
@@ -50,20 +60,55 @@ Audit this Shopify store for ACP, UCP, x402, MCP, crawler access, llms.txt, sche
 ```
 
 ```text
+Find product knowledge gaps that would stop ChatGPT, Claude, Perplexity, or Gemini from recommending this store confidently.
+```
+
+```text
+Review this store's shipping, returns, refunds, warranty, and support policies for AI shopper readiness.
+```
+
+```text
 Turn these audit findings into a custom agent remediation plan for an ecommerce owner.
 ```
 
+## What This Does Not Do
+
+- It does not guarantee search rankings, AI citations, or sales.
+- It does not certify that a store is officially accepted by any AI platform.
+- It does not prove private analytics, revenue, conversion, or Search Console data unless you provide those exports.
+- It does not recommend autonomous payments or checkout without consent, audit logs, fraud controls, and human escalation paths.
+
+## Why This Exists
+
+AI agents are becoming a new storefront interface.
+
+The first wave of Agentic Commerce work is not “let agents buy everything automatically.” It is more basic:
+
+1. Can agents discover your store?
+2. Can they understand your products?
+3. Can they cite your answers confidently?
+4. Can they explain your policies accurately?
+5. Can they identify safe next actions?
+6. Can your checkout and support flows evolve toward agentic commerce protocols?
+
+This skill pack turns those questions into practical audits and remediation plans.
+
 ## Marketplace And Discovery
 
-- Public install command: `npx skills@latest add wakqasahmed/agentic-commerce-skills`
+- Public install command: npx skills@latest add wakqasahmed/agentic-commerce-skills
 - skills.sh page: https://skills.sh/wakqasahmed/agentic-commerce-skills
-- Badge markdown: `[![skills.sh](https://skills.sh/b/wakqasahmed/agentic-commerce-skills)](https://skills.sh/wakqasahmed/agentic-commerce-skills)`
-- Keep `.claude-plugin/plugin.json` in sync with every published skill path.
-- Keep each skill short, independent, and activation-focused.
-- Link this repo from AIOpsome, founder profiles, blog posts, and Agentic Commerce content.
+- GitHub repo: https://github.com/wakqasahmed/agentic-commerce-skills
 
-## Positioning
+## For Developers
 
-This is the domain pack for Agentic Commerce and AI-ready ecommerce. It is intentionally separate from `wakqasahmed/ai-engineering-workflow-skills`, which contains general engineering workflow skills.
+If you are adopting AI coding agents for real engineering work, also see my General Engineering Workflow Skills:
 
-The public message: Waqas Ahmed helps ecommerce teams become ready for AI agents across discovery, answers, recommendations, checkout, support, and automation.
+https://github.com/wakqasahmed/ai-engineering-workflow-skills
+
+That repo covers clarification, issue decomposition, definition of done, review gates, release gates, HITL blockers, and handoffs.
+
+## Author
+
+I help ecommerce teams become ready for AI agents across discovery, answers, recommendations, checkout, support, and automation.
+
+If you want your ecommerce store reviewed for Agentic Commerce, SEO, AEO, GEO, AI crawler readiness, product data quality, policy clarity, and checkout readiness, contact me.
