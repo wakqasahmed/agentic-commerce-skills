@@ -71,6 +71,27 @@ Review this store's shipping, returns, refunds, warranty, and support policies f
 Turn these audit findings into a custom agent remediation plan for an ecommerce owner.
 ```
 
+## Behavioral Eval For readiness-audit
+
+`python3 scripts/validate-plugin.py` only checks that skill paths resolve; it does not check that a skill still produces the right behavior. `readiness-audit` carries a scoring rubric and routing thresholds, so a prose edit could silently drop a dimension or break routing without failing CI.
+
+`skills/agentic-commerce/readiness-audit/eval/` holds a behavioral eval for that skill:
+
+- `fixtures/*.html` — three frozen storefront HTML snapshots, one per routing outcome (Not Qualified, Verified Audit, Custom Agent).
+- `fixtures/*.expected.json` — the routing outcome each fixture must produce.
+- `run.py` — runs the skill (as an LLM system prompt) against each fixture and asserts: all six dimensions are scored 0-3 with cited evidence, exactly one routing outcome is stated, it matches the expected outcome, and the response makes no analytics/Search Console/revenue/ranking claim without citing a verified export. Exits `0` if every fixture passes, `1` otherwise.
+
+To run it locally:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+python3 skills/agentic-commerce/readiness-audit/eval/run.py
+```
+
+This calls the Anthropic API and has a real token cost, so it is wired into CI as a manual `workflow_dispatch` job (`.github/workflows/eval-readiness-audit.yml`), not run on every push or PR. Trigger it from the Actions tab, or with `gh workflow run eval-readiness-audit.yml`, once the `ANTHROPIC_API_KEY` repo secret is configured.
+
+To add a fixture: drop a new `.html` snapshot in `eval/fixtures/`, add a matching `<name>.expected.json` with the routing outcome it should produce, and re-run `run.py`.
+
 ## What This Does Not Do
 
 - It does not guarantee search rankings, AI citations, or sales.

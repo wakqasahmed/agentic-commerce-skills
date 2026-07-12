@@ -1,0 +1,20 @@
+name: Eval - readiness-audit
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  behavioral-eval:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run readiness-audit behavioral eval
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ANTHROPIC_API_KEY secret not configured; skipping behavioral eval."
+            echo "See README.md '#behavioral-eval-for-readiness-audit' to configure and run it."
+            exit 0
+          fi
+          python3 skills/agentic-commerce/readiness-audit/eval/run.py
