@@ -137,3 +137,5 @@ That repo covers clarification, issue decomposition, definition of done, review 
 I help ecommerce teams become ready for AI agents across discovery, answers, recommendations, checkout, support, and automation.
 
 If you want your ecommerce store reviewed for Agentic Commerce, SEO, AEO, GEO, AI crawler readiness, product data quality, policy clarity, and checkout readiness, contact me.
+
+- [JMT x402 Agent Tools](https://jmt-x402-proxy.jmthomasofficial.workers.dev) — 25 paid x402 endpoints on Base mainnet: web search, AI analysis, crypto/stock data, SEC filings, company intel, news, sentiment, macro dashboard. $0.001-$0.15/call USDC. Local LLM-powered.
