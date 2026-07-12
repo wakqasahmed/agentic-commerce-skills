@@ -40,6 +40,12 @@ FORBIDDEN_ANALYTICS_PATTERN = re.compile(
     re.IGNORECASE,
 )
 VERIFIED_EXPORT_PATTERN = re.compile(r"verified export", re.IGNORECASE)
+NEGATION_PATTERN = re.compile(
+    r"\b(no|not|without|lacks?|lacking|none|unavailable|doesn't|does not|didn't|did not|"
+    r"n/a|not provided|not observed|not available)\b",
+    re.IGNORECASE,
+)
+SENTENCE_SPLIT_PATTERN = re.compile(r"(?<=[.!?])\s+")
 
 RESPONSE_SCHEMA_INSTRUCTIONS = """
 Respond with ONLY a single JSON object (no prose, no markdown fences) matching this shape:
@@ -144,13 +150,35 @@ def check_result(result: dict, expected_routing: str, raw_text: str) -> list[str
     elif routing != expected_routing:
         failures.append(f"expected routing '{expected_routing}', got '{routing}'")
 
-    if FORBIDDEN_ANALYTICS_PATTERN.search(raw_text) and not VERIFIED_EXPORT_PATTERN.search(raw_text):
+    unverified_claims = find_unverified_analytics_claims(raw_text)
+    if unverified_claims:
         failures.append(
-            "response references analytics/Search Console/revenue/ranking data without "
-            "citing a verified export"
+            "response claims analytics/Search Console/revenue/ranking data without citing a "
+            f"verified export: {unverified_claims!r}"
         )
 
     return failures
+
+
+def find_unverified_analytics_claims(raw_text: str) -> list[str]:
+    """Return sentences that claim analytics-style access rather than disclaim it.
+
+    A sentence mentioning revenue/rankings/traffic/analytics is only a guardrail
+    violation if it asserts access to that data. The skill's own guardrails push
+    the model to *disclaim* lacking that data (e.g. "no revenue data was
+    observed"), so a sentence containing a negation word is treated as compliant
+    unless it also cites a verified export.
+    """
+    claims = []
+    for sentence in SENTENCE_SPLIT_PATTERN.split(raw_text):
+        if not FORBIDDEN_ANALYTICS_PATTERN.search(sentence):
+            continue
+        if VERIFIED_EXPORT_PATTERN.search(sentence):
+            continue
+        if NEGATION_PATTERN.search(sentence):
+            continue
+        claims.append(sentence.strip())
+    return claims
 
 
 def run_fixture(fixture_path: Path, system_prompt: str) -> bool:
