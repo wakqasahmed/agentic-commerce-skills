@@ -8,7 +8,7 @@ That said, skill instructions can direct an agent to run shell commands or fetch
 
 ## Known instructions that run commands or fetch URLs
 
-- `skills/agentic-commerce/agent-readiness/references/checks.md` — instructs the agent to run `curl` commands (with a `python3 -m json.tool` pipe) against the storefront URL under review, to gather evidence such as `robots.txt` contents, response headers, and JSON-LD payloads.
+- `skills/agentic-commerce/agent-readiness/references/checks.md` — instructs the agent to run `curl` commands (with a `python3 -m json.tool` pipe) against the storefront URL under review: fetching `robots.txt`, response headers, raw page HTML, and JSON-LD payloads, and probing for `llms.txt`/`sitemap.xml`/`.well-known/ai-plugin.json`. Several of these commands spoof the `User-Agent` header as `GPTBot`, `ClaudeBot`, or `PerplexityBot` to test bot-specific blocking — this is the one behavior in this repo that could resemble scraping-evasion to a site owner or WAF if run against a site you don't control or have permission to audit.
 - `skills/agentic-commerce/skills-marketplace-readiness/SKILL.md` — references the `npx skills@latest add owner/repo` install command as an example of a marketplace-compatible README install line; it does not itself instruct the agent to run it.
 
 No skill in this repository instructs an agent to download and execute remote scripts, transmit credentials, or fetch content from anywhere other than the storefront URL supplied by the user for that specific audit.
@@ -21,7 +21,7 @@ To report a concern:
 
 1. Open a GitHub issue in this repository: https://github.com/wakqasahmed/agentic-commerce-skills/issues/new
 2. Include the skill name (or file path), the instruction you're concerned about, and the risk you see.
-3. If the concern is sensitive and you'd rather not file a public issue, mark the issue `private` in the title and it will be triaged and, if warranted, converted to a private discussion.
+3. If the concern is sensitive, do not paste details into a public issue — a GitHub issue title cannot make an issue private. Instead use GitHub's private vulnerability reporting for this repository (Security tab → "Report a vulnerability"), which opens a private draft advisory visible only to maintainers.
 
 ## Scope
 
