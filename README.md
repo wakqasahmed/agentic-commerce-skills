@@ -99,6 +99,10 @@ This skill pack turns those questions into practical audits and remediation plan
 - skills.sh page: https://skills.sh/wakqasahmed/agentic-commerce-skills
 - GitHub repo: https://github.com/wakqasahmed/agentic-commerce-skills
 
+## Security
+
+Skills here are markdown instruction files, not executable code. See [SECURITY.md](SECURITY.md) for what that means, which skills instruct running shell commands or fetching URLs, and how to report a concern.
+
 ## For Developers
 
 If you are adopting AI coding agents for real engineering work, also see my General Engineering Workflow Skills:
