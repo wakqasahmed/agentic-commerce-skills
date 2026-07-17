@@ -48,9 +48,27 @@ REQUIRED_GUARDRAIL_TERMS = [
     "human escalation",
 ]
 
+# A prose edit can keep every required term present while quietly voiding its
+# force ("guardrail-washing") -- e.g. turning a prohibition into a soft
+# suggestion, or changing an AND-required list into an OR-optional one. A
+# bare keyword-presence check misses this, so the sentence containing
+# "autonomous payment" must ALSO carry hard prohibition framing, an
+# all-required ("without X, Y, and Z") list shape, and no permissive language.
+PROHIBITION_CUES = ("do not", "does not", "must not", "should not", "never", "shall not")
+PERMISSIVE_RED_FLAGS = (
+    "nice-to-have", "nice to have", "optional", "can strengthen", "over time",
+    "where practical", "prefer to", "preferably", "if possible", "when convenient",
+    "at least one",
+)
 
-def check_guardrail_text() -> list[str]:
-    skill_md = (SKILL_DIR / "SKILL.md").read_text()
+
+def _sentences_mentioning(text: str, phrase: str) -> list[str]:
+    # Split on sentence-ending punctuation; keep sentences containing `phrase`.
+    import re
+    return [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if phrase in s]
+
+
+def check_guardrail_text_in(skill_md: str) -> list[str]:
     if GUARDRAIL_HEADING not in skill_md:
         return ["SKILL.md has no '## Guardrails' section"]
 
@@ -58,12 +76,57 @@ def check_guardrail_text() -> list[str]:
     failures = []
     if "autonomous payment" not in guardrails_section:
         failures.append("Guardrails section no longer mentions autonomous payments")
+        return failures
     for term in REQUIRED_GUARDRAIL_TERMS:
         if term not in guardrails_section:
             failures.append(
                 f"Guardrails section no longer requires '{term}' before recommending "
                 "autonomous payments"
             )
+
+    payment_sentences = _sentences_mentioning(guardrails_section, "autonomous payment")
+    if not payment_sentences:
+        failures.append(
+            "'autonomous payment' appears outside any single sentence the guardrail "
+            "check can evaluate for prohibition framing"
+        )
+        return failures
+
+    # At least one sentence mentioning autonomous payments must carry hard
+    # prohibition framing ("do not recommend..."), not a soft/optional one.
+    if not any(
+        cue in sentence and "recommend" in sentence
+        for sentence in payment_sentences
+        for cue in PROHIBITION_CUES
+    ):
+        failures.append(
+            "No sentence about autonomous payments uses hard prohibition framing "
+            "(e.g. 'do not recommend') -- guardrail may have been softened into a "
+            "suggestion"
+        )
+
+    # The prohibition must be an unconditional "without ALL of X, Y, and Z" --
+    # not "without X or Y" (which makes the safeguards individually optional).
+    without_sentences = [s for s in payment_sentences if "without" in s]
+    if not without_sentences:
+        failures.append(
+            "No sentence about autonomous payments uses 'without' to make the "
+            "safeguards a precondition"
+        )
+    elif any(" or " in s for s in without_sentences):
+        failures.append(
+            "A sentence about autonomous payments joins required safeguards with "
+            "'or' -- this makes them individually optional instead of all-required"
+        )
+
+    for sentence in payment_sentences:
+        for red_flag in PERMISSIVE_RED_FLAGS:
+            if red_flag in sentence:
+                failures.append(
+                    f"Guardrail sentence about autonomous payments contains permissive "
+                    f"language ('{red_flag}') that weakens the prohibition"
+                )
+
     return failures
 
 
@@ -116,6 +179,35 @@ def run_fixture(scenario_path: Path) -> bool:
     return True
 
 
+def check_guardrail_text() -> list[str]:
+    return check_guardrail_text_in((SKILL_DIR / "SKILL.md").read_text())
+
+
+# Guardrail-washing regression fixtures: keyword-preserving edits that must
+# still fail, proving check_guardrail_text_in() catches meaning changes, not
+# just keyword deletion. Found during PR review (issue #11); each is a real
+# rewrite that kept all 5 required terms present.
+GUARDRAIL_WASHING_FIXTURES = {
+    "soft suggestion (keywords kept, prohibition removed)": (
+        "## Guardrails\n- Autonomous payments benefit from identity, consent, audit logs, "
+        "fraud controls, and human escalation, which are nice-to-haves that can "
+        "strengthen a recommendation over time."
+    ),
+    "AND-to-OR (keywords kept, all-required weakened to any-one-of)": (
+        "## Guardrails\n- Do not recommend autonomous payments without at least one of "
+        "identity, consent, audit logs, fraud controls, or human escalation."
+    ),
+}
+
+
+def check_guardrail_washing_resistance() -> list[str]:
+    failures = []
+    for label, mutated_text in GUARDRAIL_WASHING_FIXTURES.items():
+        if not check_guardrail_text_in(mutated_text):
+            failures.append(f"guardrail-washing fixture not caught: {label}")
+    return failures
+
+
 def main() -> int:
     all_passed = True
 
@@ -129,6 +221,17 @@ def main() -> int:
     else:
         print("PASS: Guardrails section still requires identity, consent, audit logs, "
               "fraud controls, and human escalation before autonomous payments")
+
+    print("--- guardrail-washing resistance ---")
+    washing_failures = check_guardrail_washing_resistance()
+    if washing_failures:
+        print("FAIL:")
+        for failure in washing_failures:
+            print(f"  - {failure}")
+        all_passed = False
+    else:
+        print(f"PASS: all {len(GUARDRAIL_WASHING_FIXTURES)} guardrail-washing fixtures "
+              "correctly rejected")
 
     fixtures = sorted(FIXTURES_DIR.glob("*.scenario.json"))
     if not fixtures:
