@@ -13,8 +13,8 @@ jobs:
       - name: Run readiness-audit behavioral eval
         run: |
           if [ -z "$ANTHROPIC_API_KEY" ]; then
-            echo "ANTHROPIC_API_KEY secret not configured; skipping behavioral eval."
+            echo "::error::ANTHROPIC_API_KEY secret not configured; behavioral eval did not run."
             echo "See README.md '#behavioral-eval-for-readiness-audit' to configure and run it."
-            exit 0
+            exit 1
           fi
           python3 skills/agentic-commerce/readiness-audit/eval/run.py
