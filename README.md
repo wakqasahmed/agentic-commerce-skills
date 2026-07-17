@@ -92,6 +92,24 @@ This calls the Anthropic API and has a real token cost, so it is wired into CI a
 
 To add a fixture: drop a new `.html` snapshot in `eval/fixtures/`, add a matching `<name>.expected.json` with the routing outcome it should produce, and re-run `run.py`.
 
+## Behavioral Eval For commerce-protocol-readiness
+
+`commerce-protocol-readiness` carries a payment-safety guardrail: "Do not recommend autonomous payments without identity, consent, audit logs, fraud controls, and human escalation." A prose edit could quietly weaken or drop that sentence without failing CI, and nothing exercised the decision it's meant to produce.
+
+`skills/agentic-commerce/commerce-protocol-readiness/eval/` holds a static eval for that guardrail -- no LLM calls, no API key, runs on every push/PR as part of `.github/workflows/ci.yml`:
+
+- It asserts SKILL.md's Guardrails section still requires identity, consent, audit logs, fraud controls, and human escalation before recommending autonomous payments.
+- `fixtures/*.scenario.json` -- storefront protocol-readiness and safeguard scenarios, each with a matching `*.expected.json` recommend/block outcome. Includes a fixture that looks superficially "ready" (every payment protocol scored ready/verified) but is missing identity verification, consent capture, and audit logging, plus a genuinely-ready positive control and a discovery-only negative control.
+- `run.py` codifies the guardrail as a rule (`decide_recommendation`) and asserts it produces the expected outcome for each fixture.
+
+Run it locally:
+
+```bash
+python3 skills/agentic-commerce/commerce-protocol-readiness/eval/run.py
+```
+
+To add a fixture: drop a new `<name>.scenario.json` in `eval/fixtures/` with `protocol_readiness` and `safeguards`, add a matching `<name>.expected.json`, and re-run `run.py`.
+
 ## What This Does Not Do
 
 - It does not guarantee search rankings, AI citations, or sales.
