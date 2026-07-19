@@ -7,13 +7,13 @@ on:
       - main
 
 jobs:
-  skills:
+  migration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: List skills
-        run: scripts/list-skills.sh | grep -q "skills/agentic-commerce/readiness-audit/SKILL.md"
-      - name: Validate plugin paths
-        run: python3 scripts/validate-plugin.py
-      - name: Run commerce-protocol-readiness guardrail eval
-        run: python3 skills/agentic-commerce/commerce-protocol-readiness/eval/run.py
+      - name: Verify migration notice
+        run: |
+          grep -q 'npx skills@latest add wakqasahmed/skills' README.md
+          grep -q 'historical reference' README.md
+      - name: Verify aggregate dispatch is retired
+        run: '! rg -l "aggregate-dispatch|notify-aggregate|AGGREGATE_DISPATCH_TOKEN" .github/workflows -g "!ci.yml"'
