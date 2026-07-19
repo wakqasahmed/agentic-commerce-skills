@@ -1,11 +1,17 @@
-# Agentic Commerce Skills — Archived
+# Agentic Commerce Skills
 
-This repository is a historical reference. It is no longer maintained or distributed independently.
+Canonical source for agentic-commerce readiness, protocols, policies, product knowledge, and remediation skills.
 
-Install the canonical catalogue instead:
+## Install
 
 ```bash
-npx skills@latest add wakqasahmed/skills
+npx skills@latest add wakqasahmed/agentic-commerce-skills
 ```
 
-The active skills now live under [`skills/agentic-commerce/`](https://github.com/wakqasahmed/skills/tree/main/skills/agentic-commerce) in [wakqasahmed/skills](https://github.com/wakqasahmed/skills).
+## Contents
+
+The installable skills live in [`skills/agentic-commerce/`](skills/agentic-commerce/).
+
+## Aggregate catalogue
+
+Changes merged to this repository are automatically synchronized to [wakqasahmed/skills](https://github.com/wakqasahmed/skills). Treat this repository as the source of truth for agentic-commerce skills.
