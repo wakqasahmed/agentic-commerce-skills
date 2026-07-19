@@ -13,6 +13,10 @@ description: Audit ecommerce SEO, AEO, and GEO readiness for AI-mediated discove
 4. Identify gaps by impact on buyer discovery, AI citation, and product recommendation.
 5. Convert gaps into prioritized fixes.
 
+Run the checks in `references/checks.md` and cite the observed output for each finding.
+Do not present an unverified crawl, schema, or content inference as an observed finding.
+Keep recommendations separate from evidence and do not make production changes during an audit.
+
 ## Output
 
 - Top blocking gaps
