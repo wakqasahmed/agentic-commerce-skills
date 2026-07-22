@@ -12,8 +12,20 @@ RULES = (
     "Return `HOLD` with the missing policy fact",
     "Return `BLOCK` when a material policy, exception, or authority cannot be verified.",
     "policy readability is not authority to execute an action",
+    "When a finding requires a customer communication workflow",
+    "Route verified events for receipts, shipping, cancellations, refunds, accounts, and service status to `14-transactional-service`.",
+    "Route optional post-purchase education to `09-post-purchase-customer-success` and verified inventory or price events to `16-inventory-price-alert`.",
+    "Route overlapping customer flows to `19-lifecycle-orchestration`.",
+    "Apply `00-email-marketing-guardrails` to promotional content",
+    "An email address identifies a recipient; it does not establish marketing consent.",
+    "Never relabel promotional content as transactional.",
 )
 FIELDS = {"id", "split", "prompt", "expected_skill_usage", "expected_outcome", "expected_safety_outcome"}
+DELEGATION_SCENARIO = "verified-receipt-with-promotion"
+EXPECTED_COMMUNICATION_ROUTES = {
+    "verified_order_receipt": "14-transactional-service",
+    "promotional_content": "00-email-marketing-guardrails",
+}
 
 
 def missing_rules(skill: str) -> list[str]:
@@ -44,6 +56,22 @@ def validate_contract() -> list[str]:
             failures.append(f"{case['id']} has invalid skill usage")
         if not case["expected_outcome"] or not case["expected_safety_outcome"]:
             failures.append(f"{case['id']} lacks an observable outcome")
+    delegation_cases = [case for case in cases if case.get("id") == DELEGATION_SCENARIO]
+    if len(delegation_cases) != 1:
+        failures.append("held-out manifest needs one receipt and promotion delegation scenario")
+    else:
+        scenario = delegation_cases[0]
+        fixture = scenario.get("communication_fixture", {})
+        required_inputs = ("event", "recipient_binding", "order_facts", "action_boundaries")
+        if not all(isinstance(fixture.get(field), str) and fixture[field] for field in required_inputs):
+            failures.append("delegation scenario lacks authoritative Agentic Commerce inputs")
+        routes = scenario.get("expected_communication_routes")
+        if not isinstance(routes, dict):
+            failures.append("delegation scenario lacks expected communication routes")
+        elif routes.get("verified_order_receipt") != EXPECTED_COMMUNICATION_ROUTES["verified_order_receipt"]:
+            failures.append("verified order receipt must route to 14-transactional-service")
+        elif routes.get("promotional_content") != EXPECTED_COMMUNICATION_ROUTES["promotional_content"]:
+            failures.append("promotional content must route through Email Marketing guardrails")
     if len(cases) != 10 or any(count != 5 for count in counts.values()):
         failures.append("held-out manifest must contain five use and five do-not-use cases")
     return failures

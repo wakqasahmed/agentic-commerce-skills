@@ -18,7 +18,7 @@ jobs:
       - name: Validate plugin and shared guardrails
         run: |
           python3 scripts/validate-plugin.py
-          python3 -m unittest tests/test_guardrail_contract.py
+          python3 -m unittest tests/test_guardrail_contract.py tests/test_email_delegation_contract.py
       - name: Run deterministic evals
         run: |
           python3 skills/agentic-commerce/commerce-protocol-readiness/eval/run.py
