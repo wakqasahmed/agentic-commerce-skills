@@ -15,6 +15,37 @@ REQUIRED_FIELDS = (
     "Specification version",
     "Last verified",
 )
+TRUST_AND_ORDER_REFERENCE = Path(
+    "skills/agentic-commerce/commerce-protocol-readiness/"
+    "references/trust-and-order-lifecycle.md"
+)
+REQUIRED_CITATIONS = (
+    (
+        TRUST_AND_ORDER_REFERENCE,
+        "For action-capable endpoints, require authorization evidence",
+        ("SRC-AP2",),
+    ),
+    (
+        TRUST_AND_ORDER_REFERENCE,
+        "Where OAuth DPoP is used",
+        ("SRC-OAUTH-DPOP",),
+    ),
+    (
+        TRUST_AND_ORDER_REFERENCE,
+        "For payment handoff, verify",
+        ("SRC-AP2",),
+    ),
+    (
+        TRUST_AND_ORDER_REFERENCE,
+        "Use the order's `checkout_id`",
+        ("SRC-UCP",),
+    ),
+    (
+        TRUST_AND_ORDER_REFERENCE,
+        "When AP2 applies",
+        ("SRC-AP2",),
+    ),
+)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -82,11 +113,35 @@ def markdown_citations(root: Path) -> tuple[set[str], list[str]]:
     return citations, [f"malformed citation {citation}" for citation in sorted(malformed)]
 
 
+def required_citation_errors(root: Path) -> list[str]:
+    errors = []
+    for relative_path, anchor, source_ids in REQUIRED_CITATIONS:
+        path = root / relative_path
+        if not path.is_file():
+            continue
+
+        matching_lines = [line for line in path.read_text().splitlines() if anchor in line]
+        if len(matching_lines) != 1:
+            errors.append(
+                f"{relative_path}: expected one instruction anchored by '{anchor}'"
+            )
+            continue
+
+        for source_id in source_ids:
+            citation = f"[{source_id}]"
+            if citation not in matching_lines[0]:
+                errors.append(
+                    f"{relative_path}: instruction '{anchor}' requires {citation}"
+                )
+    return errors
+
+
 def main() -> int:
     root = parse_arguments().root.resolve()
     entries, freshness_days, errors = parse_ledger(root / "SOURCES.md")
     citations, citation_errors = markdown_citations(root)
     errors.extend(citation_errors)
+    errors.extend(required_citation_errors(root))
 
     for source_id in sorted(citations - entries.keys()):
         errors.append(f"unregistered citation {source_id}")

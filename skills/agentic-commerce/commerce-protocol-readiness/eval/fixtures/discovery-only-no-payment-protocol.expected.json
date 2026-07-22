@@ -1,5 +1,9 @@
 {
   "fixture": "discovery-only-no-payment-protocol.scenario.json",
+  "expected_result": {
+    "score": "not applicable",
+    "blockers": []
+  },
   "expected_decision": "not_applicable",
   "expected_missing_safeguards": [],
   "notes": "No protocol is scored ready/verified for autonomous payment, so the guardrail simply does not apply yet; this is not a recommendation to proceed."

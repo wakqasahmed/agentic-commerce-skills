@@ -5,6 +5,21 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
 plugin = json.loads((root / ".claude-plugin" / "plugin.json").read_text())
+expected_skills = (
+    "./skills/agentic-commerce/readiness-audit",
+    "./skills/agentic-commerce/seo-aeo-geo-audit",
+    "./skills/agentic-commerce/agent-readiness",
+    "./skills/agentic-commerce/commerce-protocol-readiness",
+    "./skills/agentic-commerce/product-knowledge-gap-analysis",
+    "./skills/agentic-commerce/llms-txt-and-crawler-access",
+    "./skills/agentic-commerce/ecommerce-policy-readiness",
+    "./skills/agentic-commerce/custom-agent-remediation-plan",
+    "./skills/agentic-commerce/fde-opportunity-map",
+    "./skills/agentic-commerce/skills-marketplace-readiness",
+)
+if tuple(plugin.get("skills", [])) != expected_skills:
+    raise SystemExit("Plugin skill set must preserve public names and top-level scope")
+
 missing = [skill for skill in plugin.get("skills", []) if not (root / skill / "SKILL.md").is_file()]
 if missing:
     raise SystemExit("Missing plugin skill paths: " + ", ".join(missing))
