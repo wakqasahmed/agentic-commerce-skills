@@ -1,0 +1,12 @@
+{
+  "base_fixture": "complete-action-plan.json",
+  "remove_controls": [
+    "idempotency_or_deduplication"
+  ],
+  "expected_validation": {
+    "status": "HOLD",
+    "missing_controls": [
+      "submit-order.idempotency_or_deduplication"
+    ]
+  }
+}

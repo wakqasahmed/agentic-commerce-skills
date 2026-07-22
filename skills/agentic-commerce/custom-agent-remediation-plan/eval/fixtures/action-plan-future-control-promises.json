@@ -1,0 +1,40 @@
+{
+  "base_fixture": "complete-action-plan.json",
+  "replace_controls": {
+    "trace_or_correlation_ids": "Add trace IDs later.",
+    "authorization_evidence": "Add authorization evidence later.",
+    "audit_events": "Add audit events later.",
+    "idempotency_or_deduplication": "Add idempotency later.",
+    "reconciliation_checks": "Add reconciliation checks later.",
+    "retained_failure_evidence": "Add retained failure evidence later.",
+    "health_signals": "Add health signals later.",
+    "alert_thresholds": "Add alert thresholds later.",
+    "accountable_operator": "Add an accountable operator later.",
+    "human_escalation_path": "Add a human escalation path later.",
+    "disable_or_kill_switch": "Add a kill switch later.",
+    "rollback_or_recovery_procedure": "Add a recovery procedure later.",
+    "safe_dependency_fallback": "Add a dependency fallback later.",
+    "approval_workflow": "Add an approval workflow later.",
+    "policy_grounding": "Add policy grounding later."
+  },
+  "expected_validation": {
+    "status": "HOLD",
+    "missing_controls": [
+      "submit-order.trace_or_correlation_ids",
+      "submit-order.authorization_evidence",
+      "submit-order.audit_events",
+      "submit-order.idempotency_or_deduplication",
+      "submit-order.reconciliation_checks",
+      "submit-order.retained_failure_evidence",
+      "submit-order.health_signals",
+      "submit-order.alert_thresholds",
+      "submit-order.accountable_operator",
+      "submit-order.human_escalation_path",
+      "submit-order.disable_or_kill_switch",
+      "submit-order.rollback_or_recovery_procedure",
+      "submit-order.safe_dependency_fallback",
+      "submit-order.approval_workflow",
+      "submit-order.policy_grounding"
+    ]
+  }
+}

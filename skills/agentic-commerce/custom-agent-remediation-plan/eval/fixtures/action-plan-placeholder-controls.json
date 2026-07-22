@@ -1,0 +1,14 @@
+{
+  "base_fixture": "complete-action-plan.json",
+  "replace_controls": {
+    "alert_thresholds": "TBD",
+    "accountable_operator": "Team"
+  },
+  "expected_validation": {
+    "status": "HOLD",
+    "missing_controls": [
+      "submit-order.alert_thresholds",
+      "submit-order.accountable_operator"
+    ]
+  }
+}

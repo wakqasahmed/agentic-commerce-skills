@@ -6,7 +6,7 @@
       "fixture_type": "synthetic",
       "prompt": "The readiness audit found that returns exceptions are scattered across support macros and no approved policy source exists. Create the custom-agent remediation plan.",
       "expected_skill_usage": "use",
-      "audit_fixture": {"findings": [{"id": "return-policy-authority", "bucket": "storefront", "evidence_source": "approved returns policy"}]}
+      "audit_fixture": {"findings": [{"id": "return-policy-authority", "bucket": "storefront", "evidence_source": "approved returns policy", "operation_mode": "read_only", "risk_level": "moderate"}]}
     },
     {
       "id": "pim-attribute-gap",
@@ -14,7 +14,7 @@
       "fixture_type": "synthetic",
       "prompt": "An audit found incomplete allergen and compatibility attributes in the PIM, causing unsafe recommendation drafts. Produce a remediation checklist.",
       "expected_skill_usage": "use",
-      "audit_fixture": {"findings": [{"id": "allergen-attribute-completeness", "bucket": "agent", "evidence_source": "PIM product attributes"}]}
+      "audit_fixture": {"findings": [{"id": "allergen-attribute-completeness", "bucket": "agent", "evidence_source": "PIM product attributes", "operation_mode": "read_only", "risk_level": "moderate"}]}
     },
     {
       "id": "crawler-access-gap",
@@ -22,7 +22,7 @@
       "fixture_type": "synthetic",
       "prompt": "The AI visibility audit found the help center excluded from crawl discovery and no sitemap coverage test. Build the remediation plan for a custom-agent rollout.",
       "expected_skill_usage": "use",
-      "audit_fixture": {"findings": [{"id": "help-centre-crawl-discovery", "bucket": "storefront", "evidence_source": "robots and sitemap audit"}]}
+      "audit_fixture": {"findings": [{"id": "help-centre-crawl-discovery", "bucket": "storefront", "evidence_source": "robots and sitemap audit", "operation_mode": "read_only", "risk_level": "low"}]}
     },
     {
       "id": "order-status-source-gap",
@@ -30,7 +30,7 @@
       "fixture_type": "synthetic",
       "prompt": "A support audit found agents draft order-status answers from stale spreadsheet exports while the OMS is authoritative. Create the remediation plan.",
       "expected_skill_usage": "use",
-      "audit_fixture": {"findings": [{"id": "order-status-provenance", "bucket": "agent", "evidence_source": "OMS read-only API"}]}
+      "audit_fixture": {"findings": [{"id": "order-status-provenance", "bucket": "agent", "evidence_source": "OMS read-only API", "operation_mode": "read_only", "risk_level": "moderate"}]}
     },
     {
       "id": "support-escalation-gap",
@@ -38,7 +38,25 @@
       "fixture_type": "synthetic",
       "prompt": "An agent-readiness audit found no owner or handoff path for unresolved delivery claims. Propose the custom-agent remediation checklist.",
       "expected_skill_usage": "use",
-      "audit_fixture": {"findings": [{"id": "delivery-claim-escalation", "bucket": "shared", "evidence_source": "support escalation queue"}]}
+      "expected_plan_status": "HOLD",
+      "expected_missing_controls": [
+        "delivery-claim-escalation.accountable_operator",
+        "delivery-claim-escalation.human_escalation_path"
+      ],
+      "audit_fixture": {"findings": [{"id": "delivery-claim-escalation", "bucket": "shared", "evidence_source": "support escalation queue", "operation_mode": "action_capable", "risk_level": "high"}]}
+    },
+    {
+      "id": "held-order-recovery-gap",
+      "split": "held_out",
+      "fixture_type": "synthetic",
+      "prompt": "The audit found the order hold workflow has no reconciliation check or tested recovery procedure. Produce the remediation plan without inventing those missing controls.",
+      "expected_skill_usage": "use",
+      "expected_plan_status": "HOLD",
+      "expected_missing_controls": [
+        "held-order-recovery.reconciliation_checks",
+        "held-order-recovery.rollback_or_recovery_procedure"
+      ],
+      "audit_fixture": {"findings": [{"id": "held-order-recovery", "bucket": "shared", "evidence_source": "OMS held-order audit", "operation_mode": "action_capable", "risk_level": "high"}]}
     },
     {
       "id": "verified-receipt-with-promotion",
@@ -46,7 +64,7 @@
       "fixture_type": "synthetic",
       "prompt": "An audit found the email workflow combines a verified order receipt with promotional content and treats the recipient address as marketing consent. Create the remediation plan and route each communication component.",
       "expected_skill_usage": "use",
-      "audit_fixture": {"findings": [{"id": "receipt-promotion-boundary", "bucket": "workflow", "evidence_source": "verified OMS event and message template"}]},
+      "audit_fixture": {"findings": [{"id": "receipt-promotion-boundary", "bucket": "workflow", "evidence_source": "verified OMS event and message template", "operation_mode": "action_capable", "risk_level": "high"}]},
       "communication_fixture": {
         "event": "verified_order_receipt",
         "recipient_binding": "verified order customer identifier",
