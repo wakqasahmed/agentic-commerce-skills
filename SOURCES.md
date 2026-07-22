@@ -16,7 +16,7 @@ Freshness window: 180 days.
 
 - Publisher: Universal Commerce Protocol
 - Official URL: https://ucp.dev/2026-04-08/specification/overview/
-- Supported claim: UCP covers commerce lifecycle capabilities and publishes business discovery profiles at `/.well-known/ucp`.
+- Supported claim: UCP covers commerce lifecycle capabilities and publishes business discovery profiles at `/.well-known/ucp`; its checkout and order guidance defines merchant-authoritative totals, expiry and escalation states, idempotent state changes, authenticated lifecycle events, adjustments, retries, and reconciliation.
 - Specification version: 2026-04-08
 - Last verified: 2026-07-22
 
@@ -24,7 +24,7 @@ Freshness window: 180 days.
 
 - Publisher: Agent Payments Protocol
 - Official URL: https://ap2-protocol.org/ap2/specification/
-- Supported claim: AP2 secures agent-performed payments with signed checkout and payment mandates and receipts.
+- Supported claim: AP2 separates role verification and secures agent-performed payments with scoped, signed checkout and payment mandates bound to a merchant-signed checkout, plus receipts.
 - Specification version: 0.2
 - Last verified: 2026-07-22
 
@@ -72,8 +72,16 @@ Freshness window: 180 days.
 
 - Publisher: Visa
 - Official URL: https://developer.visa.com/capabilities/trusted-agent-protocol/trusted-agent-protocol-specifications/
-- Supported claim: Trusted Agent Protocol uses HTTP Message Signatures to convey verifiable agent identity and commerce intent to merchants.
+- Supported claim: Trusted Agent Protocol uses HTTP Message Signatures to convey verifiable agent identity and commerce intent to merchants, with timestamps and nonces for replay protection.
 - Specification version: Current unversioned merchant specification
+- Last verified: 2026-07-22
+
+## SRC-OAUTH-DPOP
+
+- Publisher: Internet Engineering Task Force
+- Official URL: https://www.rfc-editor.org/rfc/rfc9449.html
+- Supported claim: OAuth DPoP sender-constrains tokens to a proof-of-possession key, binds proofs to the request and access token, and specifies limited proof lifetimes and replay detection.
+- Specification version: RFC 9449
 - Last verified: 2026-07-22
 
 ## SRC-OPENAI-CRAWLERS

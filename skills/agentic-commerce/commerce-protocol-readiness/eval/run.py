@@ -16,6 +16,8 @@ CASES_PATH = EVAL_DIR / "held-out-cases.json"
 SHARED_GUARDRAILS = EVAL_DIR.parent.parent / "references" / "guardrails.md"
 REQUIRED_SKILL_TERMS = (
     "Classify the commerce goal",
+    "Identity and authority are independent checks",
+    "references/trust-and-order-lifecycle.md",
     "Score each protocol as",
     "Recommend the smallest next implementation",
     "../references/guardrails.md",
@@ -41,6 +43,48 @@ PERMISSIVE_RED_FLAGS = (
     "where practical", "prefer to", "preferably", "if possible", "when convenient",
     "at least one",
 )
+ACTION_FIXTURES = (
+    "advertised-endpoints-without-authority",
+    "discovery-only-no-payment-protocol",
+)
+ACTION_READY_STATES = {"ready", "verified"}
+
+
+def evaluate_action_readiness(scenario: dict) -> dict:
+    if scenario["goal"] == "discovery only":
+        return {"score": "not applicable", "blockers": []}
+
+    if not scenario["advertised_protocol_endpoints"]:
+        return {"score": "missing", "blockers": []}
+
+    evidence = scenario["evidence"]
+    blockers = [
+        field
+        for field in scenario["applicable_controls"]
+        if not evidence.get(field)
+    ]
+    if blockers:
+        return {"score": "partial", "blockers": blockers}
+    score = "verified" if scenario.get("verified_tests") else "ready"
+    return {"score": score, "blockers": []}
+
+
+def validate_action_fixture() -> list[str]:
+    failures = []
+    for fixture_name in ACTION_FIXTURES:
+        fixture = EVAL_DIR / "fixtures" / f"{fixture_name}.scenario.json"
+        expected_path = EVAL_DIR / "fixtures" / f"{fixture_name}.expected.json"
+        if not fixture.is_file() or not expected_path.is_file():
+            failures.append(f"missing action-readiness fixture: {fixture_name}")
+            continue
+
+        actual = evaluate_action_readiness(json.loads(fixture.read_text()))
+        expected = json.loads(expected_path.read_text())["expected_result"]
+        if actual != expected:
+            failures.append(f"{fixture_name}: action-readiness result {actual} != {expected}")
+        if fixture_name == ACTION_FIXTURES[0] and actual["score"] in ACTION_READY_STATES:
+            failures.append("advertised endpoints bypassed the agent-verification and authority gate")
+    return failures
 
 
 def sentences_mentioning(text: str, phrase: str) -> list[str]:
@@ -95,6 +139,7 @@ def validate_contract() -> list[str]:
             failures.append(f"SKILL.md is missing required contract text: {term}")
 
     failures.extend(validate_static_safety_contract())
+    failures.extend(validate_action_fixture())
 
     cases = json.loads(CASES_PATH.read_text()).get("cases", [])
     if len(cases) < 10:

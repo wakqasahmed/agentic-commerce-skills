@@ -40,6 +40,17 @@ class SourceValidatorTest(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("unregistered citation SRC-MISSING", result.stdout)
 
+    def test_unregistered_citation_in_progressive_reference_fails(self) -> None:
+        root = self.write_repository(valid_ledger(), "Example guidance. [SRC-TEST]\n")
+        reference = root / "skills/example/references/checks.md"
+        reference.parent.mkdir(parents=True)
+        reference.write_text("Protocol instruction. [SRC-MISSING]\n")
+
+        result = self.run_validator(root)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unregistered citation SRC-MISSING", result.stdout)
+
     def test_unused_source_fails(self) -> None:
         root = self.write_repository(valid_ledger())
 

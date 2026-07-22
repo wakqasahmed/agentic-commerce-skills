@@ -9,8 +9,9 @@ description: Audit an ecommerce storefront for agentic commerce protocols and ac
 
 1. Classify the commerce goal: discovery only, assisted checkout, native agent checkout, account linking, order support, paid API/tool access, or machine-to-machine payment.
 2. Check only discovery signals defined by the protocol in scope: documented API catalogs, UCP business profiles, A2A Agent Cards, MCP authorization metadata, WebMCP tools in a supporting browser, Agent Skills, link headers, and developer docs. [SRC-UCP] [SRC-A2A] [SRC-MCP] [SRC-WEBMCP]
-3. Check checkout readiness: cart creation, pricing/tax/shipping recalculation, inventory reservation, checkout session handoff, order confirmation, returns/refunds, and support escalation.
-4. Map protocols to the goal:
+3. Audit trust before action readiness. Identity and authority are independent checks: agent identity, user identity, delegated authority, payment authorization, and merchant policy do not substitute for one another. Use `references/trust-and-order-lifecycle.md` for the evidence gates.
+4. Check the complete checkout and order lifecycle: merchant-authoritative price, tax, shipping, and inventory recalculation; expiry and escalation; secure payment handoff; confirmation; authenticated events; cancellation, return, and refund boundaries; retry safety; and reconciliation. [SRC-UCP] [SRC-AP2]
+5. Map protocols to the goal:
    - ACP: agent-assisted discovery and checkout using the merchant's published feed and API artifacts. [SRC-ACP]
    - UCP: commerce lifecycle capabilities negotiated from the business profile at `/.well-known/ucp`. [SRC-UCP]
    - AP2: signed checkout and payment mandates that prove authorization for agent-performed payments. [SRC-AP2]
@@ -20,8 +21,8 @@ description: Audit an ecommerce storefront for agentic commerce protocols and ac
    - A2A: delegating work to agents whose capabilities and interfaces are described by an Agent Card. [SRC-A2A]
    - WebMCP: exposing page tools through the draft browser `document.modelContext` API, not through a site-wide manifest. [SRC-WEBMCP]
    - Trusted Agent Protocol: verifying agent identity and commerce intent from signed HTTP requests; it is not a crawler allowlist by itself. [SRC-TAP]
-5. Score each protocol as `not applicable`, `missing`, `partial`, `ready`, or `verified`, with evidence.
-6. Recommend the smallest next implementation that improves buyer value and merchant control.
+6. Score each protocol as `not applicable`, `missing`, `partial`, `ready`, or `verified`, with evidence. Endpoint or profile advertisement is discovery evidence only; it cannot establish action readiness.
+7. Recommend the smallest next implementation that improves buyer value and merchant control.
 
 ## Guardrails
 
