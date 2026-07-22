@@ -15,6 +15,11 @@ jobs:
         run: |
           grep -q 'npx skills@latest add wakqasahmed/agentic-commerce-skills' README.md
           grep -q 'source of truth' README.md
+      - name: Validate source ledger and citations
+        run: |
+          python3 -m unittest tests/test_validate_sources.py
+          python3 scripts/validate-sources.py
+          python3 scripts/validate-plugin.py
       - name: Run deterministic evals
         run: |
           python3 skills/agentic-commerce/commerce-protocol-readiness/eval/run.py
