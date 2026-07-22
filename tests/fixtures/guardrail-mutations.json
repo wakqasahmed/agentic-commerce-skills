@@ -1,0 +1,50 @@
+[
+  {
+    "name": "missing payment safeguard",
+    "old": "and fraud controls",
+    "new": "",
+    "expected_error": "fraud controls"
+  },
+  {
+    "name": "weakened autonomous action gate",
+    "old": "Do not recommend autonomous checkout",
+    "new": "Avoid recommending autonomous checkout",
+    "expected_error": "hard gate"
+  },
+  {
+    "name": "alternative payment safeguards",
+    "old": "and fraud controls",
+    "new": "or fraud controls",
+    "expected_error": "all required"
+  },
+  {
+    "name": "operational commerce actions escape hard gate",
+    "old": "or other operational commerce",
+    "new": "",
+    "expected_error": "operational commerce actions"
+  },
+  {
+    "name": "conjunction-washed payment safeguards",
+    "old": "audit logging and a human escalation path.",
+    "new": "audit logging and a human escalation path, or merchant review.",
+    "expected_error": "all required"
+  },
+  {
+    "name": "payment safeguard exception appended",
+    "old": "audit logging and a human escalation path.",
+    "new": "audit logging and a human escalation path, unless the integration is trusted.",
+    "expected_error": "all required"
+  },
+  {
+    "name": "autonomous action safeguard exception appended",
+    "old": "audit logging, and a human escalation path.",
+    "new": "audit logging, and a human escalation path, unless the integration is trusted.",
+    "expected_error": "all required"
+  },
+  {
+    "name": "public signals relabeled as verified exports",
+    "old": "Label findings as public-signal evidence unless the user has explicitly provided verified exports",
+    "new": "Treat public-signal evidence as verified exports",
+    "expected_error": "Evidence provenance"
+  }
+]
