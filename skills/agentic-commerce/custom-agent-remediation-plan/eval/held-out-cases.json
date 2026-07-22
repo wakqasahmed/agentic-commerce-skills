@@ -59,6 +59,24 @@
       "audit_fixture": {"findings": [{"id": "held-order-recovery", "bucket": "shared", "evidence_source": "OMS held-order audit", "operation_mode": "action_capable", "risk_level": "high"}]}
     },
     {
+      "id": "verified-receipt-with-promotion",
+      "split": "held_out",
+      "fixture_type": "synthetic",
+      "prompt": "An audit found the email workflow combines a verified order receipt with promotional content and treats the recipient address as marketing consent. Create the remediation plan and route each communication component.",
+      "expected_skill_usage": "use",
+      "audit_fixture": {"findings": [{"id": "receipt-promotion-boundary", "bucket": "workflow", "evidence_source": "verified OMS event and message template", "operation_mode": "action_capable", "risk_level": "high"}]},
+      "communication_fixture": {
+        "event": "verified_order_receipt",
+        "recipient_binding": "verified order customer identifier",
+        "order_facts": "verified OMS receipt facts",
+        "action_boundaries": "send the service receipt; require separate marketing consent for promotion"
+      },
+      "expected_communication_routes": {
+        "verified_order_receipt": "14-transactional-service",
+        "promotional_content": "00-email-marketing-guardrails"
+      }
+    },
+    {
       "id": "issue-refund",
       "split": "held_out",
       "fixture_type": "synthetic",
