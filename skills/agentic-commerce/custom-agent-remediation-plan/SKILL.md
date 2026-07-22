@@ -17,7 +17,15 @@ Use only after verified audit findings identify remediation gaps.
 
 Run the checks in `references/checks.md` against the audit findings and proposed plan before presenting it.
 
-Classify every remediation item as agent, storefront, or shared delivery. Name an accountable owner, source of truth, observable acceptance test, baseline check, and post-change check for every remediation item.
+Classify every remediation item as agent, storefront, or shared delivery. Also classify it as `action_capable` or `read_only` and assign a low, moderate, or high risk level. Name an accountable owner, source of truth, observable acceptance test, baseline check, and post-change check for every remediation item.
+
+For every `action_capable` item, and for any high-risk item, define operational controls covering:
+
+- trace or correlation IDs, authorization evidence, audit events, idempotency or deduplication behavior, reconciliation checks, and retained failure evidence;
+- measurable health signals, alert thresholds, an accountable operator, and a human escalation path; and
+- a bounded disable or kill switch, a rollback or recovery procedure, and a safe fallback when a dependency is unavailable.
+
+Include the approval workflow and policy grounding required by the shared guardrails in those operational controls. Return a plan status of `HOLD` with the specific missing controls when required monitoring, ownership, reconciliation, or recovery evidence is absent. Return `READY` only when every required control is defined. Do not require these operational controls for low- or moderate-risk read-only content and discovery work.
 
 ## Guardrails
 

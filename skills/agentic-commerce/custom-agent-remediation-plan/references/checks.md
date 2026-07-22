@@ -1,12 +1,12 @@
 # Custom-agent remediation plan checks
 
-Set `$PLAN` to a local JSON file containing proposed remediation items. Each item must include `id`, `bucket`, `owner`, `acceptance_test`, and `evidence_source`.
+Set `$PLAN` to a local JSON file containing proposed remediation items. Each item must include `id`, `bucket`, `owner`, `acceptance_test`, `evidence_source`, `operation_mode`, and `risk_level`.
 
 ## Validate plan completeness
 
 ```bash
 jq -e 'type == "array" and length > 0' "$PLAN"
-jq -e 'all(.[]; (.id | type == "string" and length > 0) and (.bucket | IN("content"; "product_knowledge"; "crawler_access"; "policy"; "integration"; "workflow")) and (.owner | type == "string" and length > 0) and (.acceptance_test | type == "string" and length > 0) and (.evidence_source | type == "string" and length > 0))' "$PLAN"
+jq -e 'all(.[]; (.id | type == "string" and length > 0) and (.bucket | IN("content"; "product_knowledge"; "crawler_access"; "policy"; "integration"; "workflow")) and (.owner | type == "string" and length > 0) and (.acceptance_test | type == "string" and length > 0) and (.evidence_source | type == "string" and length > 0) and (.operation_mode | IN("action_capable"; "read_only")) and (.risk_level | IN("low"; "moderate"; "high")))' "$PLAN"
 ```
 
 An item without an accountable owner, evidence source, or observable acceptance test is incomplete.
@@ -28,3 +28,11 @@ jq -r '.[] | select(.baseline_check == null or .post_change_check == null) | .id
 ```
 
 Each item needs a reproducible before/after check using source audit output as baseline evidence, not an unverified score claim.
+
+## Gate action-capable and high-risk work
+
+```bash
+jq -e 'all(.[]; if (.operation_mode == "action_capable" or .risk_level == "high") then ([.operational_controls.trace_or_correlation_ids, .operational_controls.authorization_evidence, .operational_controls.audit_events, .operational_controls.idempotency_or_deduplication, .operational_controls.reconciliation_checks, .operational_controls.retained_failure_evidence, .operational_controls.health_signals, .operational_controls.alert_thresholds, .operational_controls.accountable_operator, .operational_controls.human_escalation_path, .operational_controls.disable_or_kill_switch, .operational_controls.rollback_or_recovery_procedure, .operational_controls.safe_dependency_fallback, .operational_controls.approval_workflow, .operational_controls.policy_grounding] | all(.[]; type == "string" and length > 0)) else true end)' "$PLAN"
+```
+
+If this command fails, return `HOLD` and list each missing control. Do not substitute a general monitoring or rollback promise for checkable evidence. Low- and moderate-risk read-only content or discovery items do not need these action controls.

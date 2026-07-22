@@ -1,0 +1,20 @@
+{
+  "plan": [
+    {
+      "id": "publish-shipping-faq",
+      "bucket": "content",
+      "delivery": "storefront",
+      "owner": "Content operations",
+      "evidence_source": "Approved shipping policy",
+      "baseline_check": "Record unanswered shipping questions from the audit.",
+      "acceptance_test": "Verify the published FAQ answers each audited question from the approved policy.",
+      "post_change_check": "Repeat the content coverage check against the audit baseline.",
+      "operation_mode": "read_only",
+      "risk_level": "low"
+    }
+  ],
+  "expected_validation": {
+    "status": "READY",
+    "missing_controls": []
+  }
+}
