@@ -39,6 +39,23 @@ class RepositoryContractTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_plugin_rejects_new_protocol_specific_top_level_skill(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            mutated_root = Path(tmp) / "repository"
+            shutil.copytree(ROOT, mutated_root, ignore=shutil.ignore_patterns(".git"))
+            plugin_path = mutated_root / ".claude-plugin/plugin.json"
+            plugin = json.loads(plugin_path.read_text())
+            plugin["skills"].append("./skills/agentic-commerce/ap2-readiness")
+            skill_path = mutated_root / "skills/agentic-commerce/ap2-readiness"
+            skill_path.mkdir()
+            (skill_path / "SKILL.md").write_text("---\nname: ap2-readiness\n---\n")
+            plugin_path.write_text(json.dumps(plugin))
+
+            result = self.run_validator(mutated_root)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Plugin skill set must preserve public names", result.stdout + result.stderr)
+
     def test_guardrail_mutations_fail_validation(self) -> None:
         for mutation in MUTATIONS:
             with self.subTest(mutation=mutation["name"]):

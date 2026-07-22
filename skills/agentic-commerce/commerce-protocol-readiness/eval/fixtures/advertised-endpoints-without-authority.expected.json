@@ -1,0 +1,11 @@
+{
+  "fixture": "advertised-endpoints-without-authority.scenario.json",
+  "expected_result": {
+    "score": "partial",
+    "blockers": [
+      "agent_verification",
+      "delegated_authority"
+    ]
+  },
+  "notes": "Endpoint advertisement is discovery evidence only and cannot establish agent verification or delegated authority."
+}

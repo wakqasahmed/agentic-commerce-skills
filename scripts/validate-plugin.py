@@ -5,6 +5,21 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
 plugin = json.loads((root / ".claude-plugin" / "plugin.json").read_text())
+expected_skills = (
+    "./skills/agentic-commerce/readiness-audit",
+    "./skills/agentic-commerce/seo-aeo-geo-audit",
+    "./skills/agentic-commerce/agent-readiness",
+    "./skills/agentic-commerce/commerce-protocol-readiness",
+    "./skills/agentic-commerce/product-knowledge-gap-analysis",
+    "./skills/agentic-commerce/llms-txt-and-crawler-access",
+    "./skills/agentic-commerce/ecommerce-policy-readiness",
+    "./skills/agentic-commerce/custom-agent-remediation-plan",
+    "./skills/agentic-commerce/fde-opportunity-map",
+    "./skills/agentic-commerce/skills-marketplace-readiness",
+)
+if tuple(plugin.get("skills", [])) != expected_skills:
+    raise SystemExit("Plugin skill set must preserve public names and top-level scope")
+
 missing = [skill for skill in plugin.get("skills", []) if not (root / skill / "SKILL.md").is_file()]
 if missing:
     raise SystemExit("Missing plugin skill paths: " + ", ".join(missing))
@@ -15,11 +30,33 @@ safety_relevant_skills = (
     "custom-agent-remediation-plan",
     "ecommerce-policy-readiness",
     "fde-opportunity-map",
+    "product-knowledge-gap-analysis",
     "readiness-audit",
 )
 guardrails_path = root / "skills/agentic-commerce/references/guardrails.md"
 guardrails = guardrails_path.read_text()
 shared_reference = "See `../references/guardrails.md`"
+email_delegation_skills = (
+    "custom-agent-remediation-plan",
+    "ecommerce-policy-readiness",
+)
+delegated_email_skills = (
+    "00-email-marketing-guardrails",
+    "09-post-purchase-customer-success",
+    "14-transactional-service",
+    "16-inventory-price-alert",
+    "19-lifecycle-orchestration",
+)
+agentic_email_skills = (*delegated_email_skills, "email-writing")
+email_delegation_rules = (
+    "When a finding requires a customer communication workflow, Agentic Commerce supplies the authoritative event, verified recipient binding, order or product facts, and permitted action boundaries. Delegate channel execution to the [Email Marketing skills pack](https://github.com/wakqasahmed/email-marketing-skills):",
+    "Route verified events for receipts, shipping, cancellations, refunds, accounts, and service status to `14-transactional-service`.",
+    "Route optional post-purchase education to `09-post-purchase-customer-success` and verified inventory or price events to `16-inventory-price-alert`.",
+    "Route overlapping customer flows to `19-lifecycle-orchestration`.",
+    "Apply `00-email-marketing-guardrails` to promotional content and all other delegated channel work.",
+    "An email address identifies a recipient; it does not establish marketing consent.",
+    "Never relabel promotional content as transactional.",
+)
 
 for skill_name in safety_relevant_skills:
     skill_path = root / "skills/agentic-commerce" / skill_name / "SKILL.md"
@@ -65,6 +102,24 @@ if missing_delegations:
         "Missing canonical AI Visibility delegations: "
         + ", ".join(sorted(missing_delegations))
     )
+
+for skill_name in email_delegation_skills:
+    skill_path = root / "skills/agentic-commerce" / skill_name / "SKILL.md"
+    skill = skill_path.read_text()
+    for rule in email_delegation_rules:
+        if skill.count(rule) != 1:
+            raise SystemExit(
+                f"Customer communication delegation contract missing from {skill_name}: {rule}"
+            )
+
+for skill_path in (root / "skills/agentic-commerce").glob("*/SKILL.md"):
+    frontmatter = skill_path.read_text().partition("---")[2].partition("---")[0]
+    name_match = re.search(r"^name:\s*(\S+)\s*$", frontmatter, re.MULTILINE)
+    if name_match and name_match.group(1) in agentic_email_skills:
+        raise SystemExit(
+            "Delegated Email Marketing skills must not be copied into Agentic Commerce: "
+            f"{name_match.group(1)}"
+        )
 
 normalized_guardrails = " ".join(guardrails.split())
 autonomous_section = normalized_guardrails.partition("## Autonomous action safety")[2]

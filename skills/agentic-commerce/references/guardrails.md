@@ -7,8 +7,9 @@ words. Rules that apply to only one skill stay inline in that skill's `SKILL.md`
 ## Safety-relevant skills
 
 The current safety-relevant skills are `agent-readiness`, `commerce-protocol-readiness`,
-`custom-agent-remediation-plan`, `ecommerce-policy-readiness`, `fde-opportunity-map`, and
-`readiness-audit`. They assess or plan agent-executed checkout, payment, support, order, or other
+`custom-agent-remediation-plan`, `ecommerce-policy-readiness`, `fde-opportunity-map`,
+`product-knowledge-gap-analysis`, and `readiness-audit`. They assess or plan agent-executed
+checkout, payment, support, order, or other
 operational commerce actions and must reference this contract.
 
 ## Autonomous action safety

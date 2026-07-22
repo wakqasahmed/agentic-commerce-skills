@@ -23,7 +23,9 @@ Score each dimension 0-3.
 | Product knowledge | No structured data, sparse product copy | Partial attributes, no variants or availability | Product schema with price and availability, variant gaps | Complete attributes, variants, stock, offers in structured data |
 | Agent access | Crawlers or AI bots blocked | Accessible but client-side-only rendering | Server-rendered content and sitemap, no agent affordances | Explicit affordances: `llms.txt`, feeds, or API/protocol paths |
 | Policy/support | Policies missing or contradictory | Policies vague on returns, shipping, refunds | Clear policies and findable support channels | Policies precise enough for an agent to answer or act on |
-| Commerce/action readiness | No bounded actions possible | Checkout works for humans only | Clear cart/checkout flow an agent could supervise | Protocol or API path toward agent-driven ordering |
+| Commerce/action readiness | No bounded actions possible | Checkout works for humans only | Supervised cart/checkout with bounded actions, explicit policy and escalation; trust, authority, or lifecycle verification remains incomplete | Tested protocol or API ordering path with verified agent identity, scoped delegated authority, secure payment handoff, retry safety, and authenticated order lifecycle |
+
+An advertised protocol or API endpoint alone cannot score 3. For action-capable goals, missing agent verification or delegated authority caps this dimension at 2; use `commerce-protocol-readiness` for the underlying trust and lifecycle evidence. This refines the existing dimension without changing dimensions or routing thresholds.
 
 ## Routing thresholds
 

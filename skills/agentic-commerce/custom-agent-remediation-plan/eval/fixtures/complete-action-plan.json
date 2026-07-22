@@ -1,0 +1,37 @@
+{
+  "plan": [
+    {
+      "id": "submit-order",
+      "bucket": "integration",
+      "delivery": "shared",
+      "owner": "Commerce operations",
+      "evidence_source": "Order API audit export",
+      "baseline_check": "Record the current failed-order rate.",
+      "acceptance_test": "Submit a sandbox order and correlate every state change.",
+      "post_change_check": "Confirm the order and audit event reconcile.",
+      "operation_mode": "action_capable",
+      "risk_level": "high",
+      "operational_controls": {
+        "trace_or_correlation_ids": "Persist one correlation ID across agent, checkout, and OMS events.",
+        "authorization_evidence": "Retain the approving actor and policy decision for every order.",
+        "audit_events": "Emit immutable requested, approved, submitted, and completed events.",
+        "idempotency_or_deduplication": "Reuse the order intent ID as the idempotency key and reject duplicates.",
+        "reconciliation_checks": "Reconcile submitted intents against OMS orders every five minutes.",
+        "retained_failure_evidence": "Retain redacted request, response, and state-transition evidence for 30 days.",
+        "health_signals": "Measure submission success, error rate, latency, and reconciliation lag.",
+        "alert_thresholds": "Page when errors exceed 2% for five minutes or reconciliation lag exceeds ten minutes.",
+        "accountable_operator": "Commerce operations on-call",
+        "human_escalation_path": "Route unresolved alerts to the incident commander and support lead.",
+        "disable_or_kill_switch": "Disable order submission without disabling read-only order status.",
+        "rollback_or_recovery_procedure": "Roll back the connector and replay reconciled pending intents once.",
+        "safe_dependency_fallback": "Stop writes, preserve the intent, and direct the customer to assisted checkout.",
+        "approval_workflow": "Require an approved order intent before submission.",
+        "policy_grounding": "Evaluate the approved checkout and fulfillment policies before submission."
+      }
+    }
+  ],
+  "expected_validation": {
+    "status": "READY",
+    "missing_controls": []
+  }
+}

@@ -1,7 +1,8 @@
 # Commerce protocol behavior eval
 
 `python3 run.py` is the PR-CI deterministic layer. It is offline, has no model
-or credentials, and checks only the SKILL.md contract and held-out case schema.
+or credentials, and checks the SKILL.md contract, held-out case schema, and
+checked-in action-readiness trust-gate scenario.
 It intentionally does not generate, score, or report agent outcomes.
 
 `held-out-cases.json` is not a tuning set. It has five expected uses of this

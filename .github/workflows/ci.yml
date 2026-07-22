@@ -15,15 +15,20 @@ jobs:
         run: |
           grep -q 'npx skills@latest add wakqasahmed/agentic-commerce-skills' README.md
           grep -q 'source of truth' README.md
+      - name: Validate source ledger and citations
+        run: |
+          python3 -m unittest tests/test_validate_sources.py
+          python3 scripts/validate-sources.py
       - name: Validate plugin and shared guardrails
         run: |
           python3 scripts/validate-plugin.py
-          python3 -m unittest tests/test_guardrail_contract.py
+          python3 -m unittest tests/test_guardrail_contract.py tests/test_email_delegation_contract.py
       - name: Run deterministic evals
         run: |
           python3 skills/agentic-commerce/commerce-protocol-readiness/eval/run.py
           bash skills/agentic-commerce/agent-readiness/eval/run-eval.sh
           python3 skills/agentic-commerce/ecommerce-policy-readiness/eval/run.py
+          python3 -m unittest tests/test_product_catalog_consistency.py
           python3 skills/agentic-commerce/product-knowledge-gap-analysis/eval/run.py
           bash skills/agentic-commerce/llms-txt-and-crawler-access/eval/run-eval.sh
           python3 skills/agentic-commerce/fde-opportunity-map/eval/run.py

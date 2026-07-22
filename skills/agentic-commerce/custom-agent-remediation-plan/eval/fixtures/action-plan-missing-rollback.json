@@ -1,0 +1,12 @@
+{
+  "base_fixture": "complete-action-plan.json",
+  "remove_controls": [
+    "rollback_or_recovery_procedure"
+  ],
+  "expected_validation": {
+    "status": "HOLD",
+    "missing_controls": [
+      "submit-order.rollback_or_recovery_procedure"
+    ]
+  }
+}

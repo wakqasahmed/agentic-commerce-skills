@@ -1,0 +1,24 @@
+{
+  "fixture": "advertised-endpoints-without-authority.scenario.json",
+  "goal": "native agent checkout",
+  "description": "The merchant advertises UCP checkout and MCP order endpoints, but does not verify the calling agent or evidence user-delegated authority.",
+  "advertised_protocol_endpoints": [
+    "/.well-known/ucp",
+    "/mcp"
+  ],
+  "applicable_controls": [
+    "agent_verification",
+    "delegated_authority",
+    "checkout_integrity",
+    "secure_payment_handoff",
+    "lifecycle_controls"
+  ],
+  "evidence": {
+    "agent_verification": false,
+    "delegated_authority": false,
+    "checkout_integrity": true,
+    "secure_payment_handoff": true,
+    "lifecycle_controls": true
+  },
+  "verified_tests": false
+}

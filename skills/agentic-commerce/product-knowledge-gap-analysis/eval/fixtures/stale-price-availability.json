@@ -1,0 +1,67 @@
+{
+  "id": "stale-price-and-availability",
+  "evidence": [
+    {
+      "surface": "raw_html",
+      "provenance": "public",
+      "observed_at": "2026-07-22T10:00:00Z",
+      "facts": {"product_identifier": "BG-200", "variant_identifier": "BG-200-TAN", "price": "79.00", "currency": "USD", "availability": "in_stock", "sale_timing": "ends_2026-07-31", "fulfillment_state": "ship_to_home", "freshness_indicator": "generated_2026-07-01"}
+    },
+    {
+      "surface": "rendered_product_content",
+      "provenance": "public",
+      "observed_at": "2026-07-22T10:01:00Z",
+      "facts": {"product_identifier": "BG-200", "variant_identifier": "BG-200-TAN", "price": "89.00", "currency": "USD", "availability": "out_of_stock", "sale_timing": "ends_2026-07-31", "fulfillment_state": "ship_to_home", "freshness_indicator": "catalog_revision_945"}
+    },
+    {
+      "surface": "json_ld",
+      "provenance": "public",
+      "observed_at": "2026-07-22T10:00:00Z",
+      "facts": {"product_identifier": "BG-200", "variant_identifier": "BG-200-TAN", "price": "79.00", "currency": "USD", "availability": "in_stock", "sale_timing": "ends_2026-07-31", "fulfillment_state": "ship_to_home", "freshness_indicator": "generated_2026-07-01"}
+    },
+    {
+      "surface": "operator_public_feed",
+      "provenance": "public",
+      "observed_at": "2026-07-22T09:55:00Z",
+      "facts": {"product_identifier": "BG-200", "variant_identifier": "BG-200-TAN", "price": "79.00", "currency": "USD", "availability": "in_stock", "sale_timing": "ends_2026-07-31", "fulfillment_state": "ship_to_home", "freshness_indicator": "generated_2026-07-01"}
+    },
+    {
+      "surface": "checkout",
+      "provenance": "verified_operator_evidence",
+      "observed_at": "2026-07-22T10:04:00Z",
+      "non_purchasing": true,
+      "order_placed": false,
+      "facts": {"product_identifier": "BG-200", "variant_identifier": "BG-200-TAN", "price": "89.00", "currency": "USD", "availability": "out_of_stock", "sale_timing": "ends_2026-07-31", "fulfillment_state": "ship_to_home", "freshness_indicator": "catalog_revision_945"}
+    }
+  ],
+  "reported_mismatches": [
+    {
+      "fact": "price",
+      "severity": "BLOCKING",
+      "conflicting_surfaces": [{"surface": "raw_html", "observed_value": "79.00"}, {"surface": "rendered_product_content", "observed_value": "89.00"}, {"surface": "json_ld", "observed_value": "79.00"}, {"surface": "operator_public_feed", "observed_value": "79.00"}, {"surface": "checkout", "observed_value": "89.00"}],
+      "evidence_timestamp": "2026-07-22T10:04:00Z",
+      "failure_mode": "A buyer or agent can rely on a stale advertised price.",
+      "proposed_source_of_truth": "commerce_pricing_service",
+      "remediation_owner": "pricing_operations"
+    },
+    {
+      "fact": "availability",
+      "severity": "BLOCKING",
+      "conflicting_surfaces": [{"surface": "raw_html", "observed_value": "in_stock"}, {"surface": "rendered_product_content", "observed_value": "out_of_stock"}, {"surface": "json_ld", "observed_value": "in_stock"}, {"surface": "operator_public_feed", "observed_value": "in_stock"}, {"surface": "checkout", "observed_value": "out_of_stock"}],
+      "evidence_timestamp": "2026-07-22T10:04:00Z",
+      "failure_mode": "An agent can recommend an unavailable item or promise invalid fulfillment.",
+      "proposed_source_of_truth": "inventory_availability_service",
+      "remediation_owner": "inventory_operations"
+    },
+    {
+      "fact": "freshness_indicator",
+      "severity": "BLOCKING",
+      "conflicting_surfaces": [{"surface": "raw_html", "observed_value": "generated_2026-07-01"}, {"surface": "rendered_product_content", "observed_value": "catalog_revision_945"}, {"surface": "json_ld", "observed_value": "generated_2026-07-01"}, {"surface": "operator_public_feed", "observed_value": "generated_2026-07-01"}, {"surface": "checkout", "observed_value": "catalog_revision_945"}],
+      "evidence_timestamp": "2026-07-22T10:04:00Z",
+      "failure_mode": "The audit cannot establish that public catalog evidence reflects current commerce state.",
+      "proposed_source_of_truth": "catalog_publication_pipeline",
+      "remediation_owner": "catalog_platform"
+    }
+  ],
+  "expected_validation": {"status": "BLOCKED", "blocking_facts": ["availability", "freshness_indicator", "price"]}
+}

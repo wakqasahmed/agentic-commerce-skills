@@ -12,6 +12,18 @@ RULES = (
     "Score each dimension below from public signals only, citing at least one URL or check per score.",
     "Do not imply access to Search Console, analytics, revenue, logs, rankings, or conversions unless the user provided verified exports.",
     "Prefer practical remediation over generic score commentary.",
+    "An advertised protocol or API endpoint alone cannot score 3",
+    "Any dimension at 0, or total ≤ 6",
+    "Total 7-11",
+    "Total ≥ 12 with agent access ≥ 2 and policy/support ≥ 2",
+)
+DIMENSIONS = (
+    "SEO basics",
+    "AEO/GEO content",
+    "Product knowledge",
+    "Agent access",
+    "Policy/support",
+    "Commerce/action readiness",
 )
 FIELDS = {"id", "split", "prompt", "fixture", "fixture_evidence", "expected_skill_usage", "expected_outcome", "expected_safety_outcome", "outcome_evidence", "safety_evidence"}
 
@@ -28,6 +40,10 @@ def validate_contract() -> list[str]:
             failures.append(f"missing contract rule: {rule}")
         elif rule not in missing_rules(skill.replace(rule, "removed", 1)):
             failures.append(f"mutation not rejected: {rule}")
+
+    for dimension in DIMENSIONS:
+        if skill.count(f"| {dimension} |") != 1:
+            failures.append(f"scoring dimension changed or duplicated: {dimension}")
 
     data = json.loads(CASES.read_text())
     cases = data.get("cases", []) if isinstance(data, dict) else []

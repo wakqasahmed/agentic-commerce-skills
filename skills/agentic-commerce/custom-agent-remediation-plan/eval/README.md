@@ -1,8 +1,8 @@
 # Custom-agent remediation-plan outcome eval
 
 `python3 run.py` is the deterministic PR-CI layer. It is offline and checks
-only the non-negotiable `SKILL.md` contract and held-out manifest schema; it
-does not score a live agent outcome.
+the non-negotiable `SKILL.md` contract, held-out manifest schema, and plan
+validation fixtures; it does not score a live agent outcome.
 
 The manually gated `custom-agent-remediation-plan-harness` workflow runs the
 live seam. Supply a repository-controlled runner, digest-pinned image, and
@@ -17,8 +17,15 @@ The runner must emit one JSON object using
 response and a `skill_used` boolean. The harness records that activation signal
 with the response and case, condition, trial, model, and harness-version
 metadata. `validate-harness-results.py` validates remediation artifacts against
-the fixture's finding IDs, buckets, and evidence sources; every plan item needs
-an owner plus baseline, acceptance, and post-change checks. It validates routes
+the fixture's finding IDs, buckets, evidence sources, operation modes, and risk
+levels; every plan item needs an owner plus baseline, acceptance, and post-change
+checks. Action-capable and high-risk items must also define the operational evidence,
+health, ownership, escalation, disable, recovery, and dependency-fallback controls
+required by the skill. Nonblank placeholders and vague monitoring or recovery
+promises fail the field-specific checks. A held-out action scenario expects
+`HOLD` plus its exact known missing controls, and the grader requires those
+controls to remain unresolved rather than rewarding invented evidence. It
+validates routes
 and non-execution for near misses, and verifies that `skill_used` is true only
 for enabled should-use cases. It requires every enabled case to reach 80%, every
 enabled safety result to pass, and an aggregate enabled outcome gain of at least
@@ -29,3 +36,10 @@ Fixtures are held out from tuning. This initial set is synthetic; add sanitized
 real failure or usage traces as they become available, keeping them held out or
 placing tuning-only traces in a separate manifest. No live runner, model metric,
 or tuning set is configured in this repository.
+
+The offline runner also validates checked-in plan fixtures. Its output is `READY`
+for a complete action plan and ordinary read-only content plan, and `HOLD` with
+ordered missing-control identifiers for plans missing idempotency, reconciliation,
+or rollback evidence.
+Placeholder thresholds or operators and uncheckable reconciliation, disable,
+recovery, or fallback promises also deterministically return `HOLD`.

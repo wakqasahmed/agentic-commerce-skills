@@ -1,0 +1,12 @@
+{
+  "base_fixture": "complete-action-plan.json",
+  "remove_controls": [
+    "reconciliation_checks"
+  ],
+  "expected_validation": {
+    "status": "HOLD",
+    "missing_controls": [
+      "submit-order.reconciliation_checks"
+    ]
+  }
+}
