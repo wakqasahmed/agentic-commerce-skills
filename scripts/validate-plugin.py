@@ -15,6 +15,7 @@ safety_relevant_skills = (
     "custom-agent-remediation-plan",
     "ecommerce-policy-readiness",
     "fde-opportunity-map",
+    "product-knowledge-gap-analysis",
     "readiness-audit",
 )
 guardrails_path = root / "skills/agentic-commerce/references/guardrails.md"

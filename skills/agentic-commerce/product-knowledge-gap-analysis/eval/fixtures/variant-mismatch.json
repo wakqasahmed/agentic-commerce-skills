@@ -1,0 +1,55 @@
+{
+  "id": "variant-identifier-mismatch",
+  "evidence": [
+    {
+      "surface": "raw_html",
+      "provenance": "public",
+      "observed_at": "2026-07-22T09:00:00Z",
+      "facts": {"product_identifier": "TS-100", "variant_identifier": "TS-100-BLU-M", "price": "39.00", "currency": "USD", "availability": "in_stock", "sale_timing": "none", "fulfillment_state": "ship_to_home", "freshness_indicator": "catalog_revision_812"}
+    },
+    {
+      "surface": "rendered_product_content",
+      "provenance": "public",
+      "observed_at": "2026-07-22T09:01:00Z",
+      "facts": {"product_identifier": "TS-100", "variant_identifier": "TS-100-BLU-M", "price": "39.00", "currency": "USD", "availability": "in_stock", "sale_timing": "none", "fulfillment_state": "ship_to_home", "freshness_indicator": "catalog_revision_812"}
+    },
+    {
+      "surface": "json_ld",
+      "provenance": "public",
+      "observed_at": "2026-07-22T09:00:00Z",
+      "facts": {"product_identifier": "TS-100", "variant_identifier": "TS-100-BLU-M", "price": "39.00", "currency": "USD", "availability": "in_stock", "sale_timing": "none", "fulfillment_state": "ship_to_home", "freshness_indicator": "catalog_revision_812"}
+    },
+    {
+      "surface": "operator_public_feed",
+      "provenance": "public",
+      "observed_at": "2026-07-22T08:58:00Z",
+      "facts": {"product_identifier": "TS-100", "variant_identifier": "TS-100-BLU-L", "price": "39.00", "currency": "USD", "availability": "in_stock", "sale_timing": "none", "fulfillment_state": "ship_to_home", "freshness_indicator": "catalog_revision_812"}
+    },
+    {
+      "surface": "checkout",
+      "provenance": "supervised_checkout",
+      "observed_at": "2026-07-22T09:03:00Z",
+      "non_purchasing": true,
+      "order_placed": false,
+      "facts": {"product_identifier": "TS-100", "variant_identifier": "TS-100-BLU-M", "price": "39.00", "currency": "USD", "availability": "in_stock", "sale_timing": "none", "fulfillment_state": "ship_to_home", "freshness_indicator": "catalog_revision_812"}
+    }
+  ],
+  "reported_mismatches": [
+    {
+      "fact": "variant_identifier",
+      "severity": "BLOCKING",
+      "conflicting_surfaces": [
+        {"surface": "raw_html", "observed_value": "TS-100-BLU-M"},
+        {"surface": "rendered_product_content", "observed_value": "TS-100-BLU-M"},
+        {"surface": "json_ld", "observed_value": "TS-100-BLU-M"},
+        {"surface": "operator_public_feed", "observed_value": "TS-100-BLU-L"},
+        {"surface": "checkout", "observed_value": "TS-100-BLU-M"}
+      ],
+      "evidence_timestamp": "2026-07-22T09:03:00Z",
+      "failure_mode": "An agent can select or describe the wrong size variant.",
+      "proposed_source_of_truth": "inventory_platform_variant_record",
+      "remediation_owner": "catalog_operations"
+    }
+  ],
+  "expected_validation": {"status": "BLOCKED", "blocking_facts": ["variant_identifier"]}
+}

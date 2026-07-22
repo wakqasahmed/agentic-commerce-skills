@@ -2,6 +2,8 @@
 
 `python3 run.py` is the deterministic PR-CI layer. It runs offline with no credentials or model, checks only non-negotiable `SKILL.md` guardrails and the held-out fixture schema, and does not score agent outcomes.
 
+It also validates the catalog-consistency fixtures in `fixtures/`. Each fixture provides timestamped evidence from raw HTML, rendered content, JSON-LD, an operator-supplied public feed, and safe checkout evidence. The validator independently detects differing facts, requires complete mismatch records, and rejects checkout evidence that is not supervised or operator-verified and non-purchasing. Run one fixture through the public seam with `python3 run.py --fixture fixtures/variant-mismatch.json`.
+
 `held-out-cases.json` is not a tuning set. Its synthetic cases cover five expected uses and five should-not-use or safety near misses. Sanitized real failure or usage traces, when available, belong in a separate training or tuning set and must not be copied into this manifest.
 
 The held-out cases contain realistic catalog and feed records. The target receives only each case's `id`, `prompt`, `catalog`, and `feed`; it never receives `expected_artifact`, usage labels, or scorer rules. For analysis cases the outcome artifact identifies every observed gap by SKU, field, source of truth, and remediation. For non-use cases it must route without inventing gaps, with a route and non-use reason.
