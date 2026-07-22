@@ -13,10 +13,11 @@ operational commerce actions and must reference this contract.
 
 ## Autonomous action safety
 
-Do not recommend autonomous checkout, payment, or support actions without approval workflows,
-policy grounding, audit logging, and a human escalation path. Autonomous payment execution
-additionally requires all of the following before it is recommended: identity verification,
-consent capture, and fraud controls, together with audit logging and a human escalation path.
+Do not recommend autonomous checkout, payment, support, order, or other operational commerce
+actions without approval workflows, policy grounding, audit logging, and a human escalation path.
+Autonomous payment execution additionally requires all of the following before it is recommended:
+identity verification, consent capture, and fraud controls, together with
+audit logging and a human escalation path.
 
 ## Evidence provenance
 

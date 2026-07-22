@@ -7,14 +7,32 @@
   },
   {
     "name": "weakened autonomous action gate",
-    "old": "Do not recommend autonomous checkout, payment, or support actions without",
-    "new": "Avoid recommending autonomous checkout, payment, or support actions without",
+    "old": "Do not recommend autonomous checkout",
+    "new": "Avoid recommending autonomous checkout",
     "expected_error": "hard gate"
   },
   {
     "name": "alternative payment safeguards",
     "old": "and fraud controls",
     "new": "or fraud controls",
+    "expected_error": "all required"
+  },
+  {
+    "name": "operational commerce actions escape hard gate",
+    "old": "or other operational commerce",
+    "new": "",
+    "expected_error": "operational commerce actions"
+  },
+  {
+    "name": "conjunction-washed payment safeguards",
+    "old": "audit logging and a human escalation path.",
+    "new": "audit logging and a human escalation path, or merchant review.",
+    "expected_error": "all required"
+  },
+  {
+    "name": "payment safeguard exception appended",
+    "old": "audit logging and a human escalation path.",
+    "new": "audit logging and a human escalation path, unless the integration is trusted.",
     "expected_error": "all required"
   }
 ]
