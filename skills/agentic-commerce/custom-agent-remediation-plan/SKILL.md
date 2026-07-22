@@ -19,6 +19,17 @@ Run the checks in `references/checks.md` against the audit findings and proposed
 
 Classify every remediation item as agent, storefront, or shared delivery. Name an accountable owner, source of truth, observable acceptance test, baseline check, and post-change check for every remediation item.
 
+## Customer communication delegation
+
+When a finding requires a customer communication workflow, Agentic Commerce supplies the authoritative event, verified recipient binding, order or product facts, and permitted action boundaries. Delegate channel execution to the [Email Marketing skills pack](https://github.com/wakqasahmed/email-marketing-skills):
+
+- Route verified events for receipts, shipping, cancellations, refunds, accounts, and service status to `14-transactional-service`.
+- Route optional post-purchase education to `09-post-purchase-customer-success` and verified inventory or price events to `16-inventory-price-alert`.
+- Route overlapping customer flows to `19-lifecycle-orchestration`.
+- Apply `00-email-marketing-guardrails` to promotional content and all other delegated channel work.
+
+An email address identifies a recipient; it does not establish marketing consent. Never relabel promotional content as transactional.
+
 ## Guardrails
 
 - See `../references/guardrails.md` for shared cross-skill guardrails (autonomous action safety, evidence provenance, internal runtime disclosure).
