@@ -26,6 +26,12 @@ EXPECTED_COMMUNICATION_ROUTES = {
     "verified_order_receipt": "14-transactional-service",
     "promotional_content": "00-email-marketing-guardrails",
 }
+EXPECTED_COMMUNICATION_FIXTURE = {
+    "event": "verified_order_receipt",
+    "recipient_binding": "verified order customer identifier",
+    "order_facts": "verified OMS receipt facts",
+    "action_boundaries": "send the service receipt; require separate marketing consent for promotion",
+}
 
 
 def validate_contract() -> list[str]:
@@ -72,8 +78,7 @@ def validate_contract() -> list[str]:
     else:
         scenario = delegation_cases[0]
         fixture = scenario.get("communication_fixture", {})
-        required_inputs = ("event", "recipient_binding", "order_facts", "action_boundaries")
-        if not all(isinstance(fixture.get(field), str) and fixture[field] for field in required_inputs):
+        if fixture != EXPECTED_COMMUNICATION_FIXTURE:
             failures.append("delegation scenario lacks authoritative Agentic Commerce inputs")
         routes = scenario.get("expected_communication_routes")
         if not isinstance(routes, dict):

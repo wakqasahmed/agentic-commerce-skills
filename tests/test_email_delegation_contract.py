@@ -101,8 +101,8 @@ class EmailDelegationContractTest(unittest.TestCase):
             )
             copied_skill.parent.mkdir()
             copied_skill.write_text(
-                "---\nname: 14-transactional-service\n"
-                "description: Copied email execution.\n---\n"
+                "---\nname: email-writing\n"
+                "description: Agentic Commerce email execution.\n---\n"
             )
 
             result = self.run_validator(
@@ -115,7 +115,36 @@ class EmailDelegationContractTest(unittest.TestCase):
                 result.stdout + result.stderr,
             )
 
-    def test_eval_runners_enforce_receipt_and_promotion_routing(self) -> None:
+    def test_eval_runners_require_authoritative_communication_inputs(self) -> None:
+        mutations = {
+            "event": "unverified_order_receipt",
+            "recipient_binding": "marketing list email address",
+            "order_facts": "inferred order facts",
+        }
+        for runner, manifest_path in SCENARIOS:
+            for field, replacement in mutations.items():
+                with self.subTest(runner=runner, field=field):
+                    with tempfile.TemporaryDirectory() as tmp:
+                        mutated_root = self.copy_repository(Path(tmp))
+                        mutated_manifest_path = mutated_root / manifest_path
+                        manifest = json.loads(mutated_manifest_path.read_text())
+                        scenario = next(
+                            case
+                            for case in manifest["cases"]
+                            if case["id"] == "verified-receipt-with-promotion"
+                        )
+                        scenario["communication_fixture"][field] = replacement
+                        mutated_manifest_path.write_text(json.dumps(manifest))
+
+                        result = self.run_validator(mutated_root, runner)
+
+                        self.assertNotEqual(result.returncode, 0)
+                        self.assertIn(
+                            "delegation scenario lacks authoritative Agentic Commerce inputs",
+                            result.stdout + result.stderr,
+                        )
+
+    def test_eval_runners_enforce_receipt_routing(self) -> None:
         for runner, manifest_path in SCENARIOS:
             with self.subTest(runner=runner):
                 with tempfile.TemporaryDirectory() as tmp:
@@ -137,6 +166,31 @@ class EmailDelegationContractTest(unittest.TestCase):
                     self.assertNotEqual(result.returncode, 0)
                     self.assertIn(
                         "verified order receipt must route to 14-transactional-service",
+                        result.stdout + result.stderr,
+                    )
+
+    def test_eval_runners_route_promotion_through_marketing_guardrails(self) -> None:
+        for runner, manifest_path in SCENARIOS:
+            with self.subTest(runner=runner):
+                with tempfile.TemporaryDirectory() as tmp:
+                    mutated_root = self.copy_repository(Path(tmp))
+                    mutated_manifest_path = mutated_root / manifest_path
+                    manifest = json.loads(mutated_manifest_path.read_text())
+                    scenario = next(
+                        case
+                        for case in manifest["cases"]
+                        if case["id"] == "verified-receipt-with-promotion"
+                    )
+                    scenario["expected_communication_routes"][
+                        "promotional_content"
+                    ] = "14-transactional-service"
+                    mutated_manifest_path.write_text(json.dumps(manifest))
+
+                    result = self.run_validator(mutated_root, runner)
+
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(
+                        "promotional content must route through Email Marketing guardrails",
                         result.stdout + result.stderr,
                     )
 

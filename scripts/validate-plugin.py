@@ -31,6 +31,7 @@ delegated_email_skills = (
     "16-inventory-price-alert",
     "19-lifecycle-orchestration",
 )
+agentic_email_skills = (*delegated_email_skills, "email-writing")
 email_delegation_rules = (
     "When a finding requires a customer communication workflow, Agentic Commerce supplies the authoritative event, verified recipient binding, order or product facts, and permitted action boundaries. Delegate channel execution to the [Email Marketing skills pack](https://github.com/wakqasahmed/email-marketing-skills):",
     "Route verified events for receipts, shipping, cancellations, refunds, accounts, and service status to `14-transactional-service`.",
@@ -61,7 +62,7 @@ for skill_name in email_delegation_skills:
 for skill_path in (root / "skills/agentic-commerce").glob("*/SKILL.md"):
     frontmatter = skill_path.read_text().partition("---")[2].partition("---")[0]
     name_match = re.search(r"^name:\s*(\S+)\s*$", frontmatter, re.MULTILINE)
-    if name_match and name_match.group(1) in delegated_email_skills:
+    if name_match and name_match.group(1) in agentic_email_skills:
         raise SystemExit(
             "Delegated Email Marketing skills must not be copied into Agentic Commerce: "
             f"{name_match.group(1)}"
