@@ -79,6 +79,66 @@ class ProductCatalogConsistencyTest(unittest.TestCase):
         self.assertIn("checkout evidence must be supervised or operator-verified", result.stderr)
         self.assertIn("checkout evidence must be non-purchasing", result.stderr)
 
+    def test_checkout_like_unknown_surface_cannot_bypass_checkout_safety(self) -> None:
+        def disguise_checkout_as_public(data: dict) -> None:
+            checkout = next(
+                evidence
+                for evidence in data["evidence"]
+                if evidence["surface"] == "checkout"
+            )
+            checkout["surface"] = "checkout_api"
+            checkout["provenance"] = "public"
+            checkout["non_purchasing"] = False
+            checkout["order_placed"] = True
+            data["reported_mismatches"][0]["conflicting_surfaces"][-1]["surface"] = (
+                "checkout_api"
+            )
+
+        fixture = self.write_mutation("variant-mismatch.json", disguise_checkout_as_public)
+
+        result = self.run_evaluator(fixture)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unsupported evidence surface checkout_api", result.stderr)
+
+    def test_action_changing_mismatches_must_be_blocking(self) -> None:
+        action_changing_facts = (
+            "product_identifier",
+            "variant_identifier",
+            "price",
+            "currency",
+            "availability",
+        )
+
+        for fact in action_changing_facts:
+            with self.subTest(fact=fact):
+                def make_non_blocking(data: dict, mismatch_fact: str = fact) -> None:
+                    report = data["reported_mismatches"][0]
+                    report["fact"] = mismatch_fact
+                    report["severity"] = "NON_BLOCKING"
+                    for index, evidence in enumerate(data["evidence"]):
+                        evidence["facts"]["variant_identifier"] = "TS-100-BLU-M"
+                        evidence["facts"][mismatch_fact] = (
+                            "conflicting-value" if index == 3 else "canonical-value"
+                        )
+                    report["conflicting_surfaces"] = [
+                        {
+                            "surface": evidence["surface"],
+                            "observed_value": evidence["facts"][mismatch_fact],
+                        }
+                        for evidence in data["evidence"]
+                    ]
+
+                fixture = self.write_mutation("variant-mismatch.json", make_non_blocking)
+
+                result = self.run_evaluator(fixture)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(
+                    f"action-changing mismatch {fact} must be BLOCKING",
+                    result.stderr,
+                )
+
     def test_plugin_validator_requires_shared_guardrails_for_product_audits(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "repository"

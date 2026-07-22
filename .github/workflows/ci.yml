@@ -28,6 +28,7 @@ jobs:
           python3 skills/agentic-commerce/commerce-protocol-readiness/eval/run.py
           bash skills/agentic-commerce/agent-readiness/eval/run-eval.sh
           python3 skills/agentic-commerce/ecommerce-policy-readiness/eval/run.py
+          python3 -m unittest tests/test_product_catalog_consistency.py
           python3 skills/agentic-commerce/product-knowledge-gap-analysis/eval/run.py
           bash skills/agentic-commerce/llms-txt-and-crawler-access/eval/run-eval.sh
           python3 skills/agentic-commerce/fde-opportunity-map/eval/run.py

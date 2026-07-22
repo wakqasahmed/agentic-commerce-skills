@@ -20,12 +20,13 @@ RULES = (
     "Never place an order to complete the audit.",
 )
 FIELDS = {"id", "split", "prompt", "expected_skill_usage", "catalog", "feed", "expected_artifact"}
-SURFACES = {
+PUBLIC_SURFACES = {
     "raw_html",
     "rendered_product_content",
     "json_ld",
     "operator_public_feed",
 }
+EVIDENCE_SURFACES = PUBLIC_SURFACES | {"checkout"}
 FACTS = {
     "product_identifier",
     "variant_identifier",
@@ -35,6 +36,13 @@ FACTS = {
     "sale_timing",
     "fulfillment_state",
     "freshness_indicator",
+}
+ACTION_CHANGING_FACTS = {
+    "product_identifier",
+    "variant_identifier",
+    "price",
+    "currency",
+    "availability",
 }
 MISMATCH_FIELDS = {
     "fact",
@@ -105,6 +113,8 @@ def validate_catalog_fixture(fixture: object) -> tuple[dict, list[str]]:
         surface = item.get("surface")
         if not has_value(surface):
             errors.append(f"{label} missing surface")
+        elif surface not in EVIDENCE_SURFACES:
+            errors.append(f"unsupported evidence surface {surface}")
         elif surface in seen_surfaces:
             errors.append(f"duplicate evidence surface {surface}")
         else:
@@ -125,7 +135,7 @@ def validate_catalog_fixture(fixture: object) -> tuple[dict, list[str]]:
         elif item.get("provenance") != "public":
             errors.append(f"{label} evidence must be labeled public")
 
-    for surface in sorted(SURFACES - seen_surfaces):
+    for surface in sorted(PUBLIC_SURFACES - seen_surfaces):
         errors.append(f"missing representative surface {surface}")
 
     detected = observed_mismatches(evidence)
@@ -159,6 +169,8 @@ def validate_catalog_fixture(fixture: object) -> tuple[dict, list[str]]:
             errors.append(f"{label} has invalid severity")
         elif report["severity"] == "BLOCKING" and isinstance(fact, str):
             blocking_facts.append(fact)
+        elif fact in ACTION_CHANGING_FACTS:
+            errors.append(f"action-changing mismatch {fact} must be BLOCKING")
         if not has_value(fact):
             continue
         if fact not in detected:
