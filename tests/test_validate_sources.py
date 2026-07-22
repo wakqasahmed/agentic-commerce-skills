@@ -1,3 +1,4 @@
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -50,6 +51,40 @@ class SourceValidatorTest(unittest.TestCase):
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("unregistered citation SRC-MISSING", result.stdout)
+
+    def test_required_trust_and_lifecycle_citations_fail_when_removed(self) -> None:
+        reference_path = Path(
+            "skills/agentic-commerce/commerce-protocol-readiness/"
+            "references/trust-and-order-lifecycle.md"
+        )
+        mutations = (
+            ("For action-capable endpoints, require authorization evidence", "[SRC-AP2]"),
+            ("Where OAuth DPoP is used", "[SRC-OAUTH-DPOP]"),
+            ("Use the order's `checkout_id`", "[SRC-UCP]"),
+            ("When AP2 applies", "[SRC-AP2]"),
+        )
+
+        for anchor, citation in mutations:
+            with self.subTest(anchor=anchor, citation=citation):
+                temporary_directory = tempfile.TemporaryDirectory()
+                self.addCleanup(temporary_directory.cleanup)
+                root = Path(temporary_directory.name) / "repository"
+                shutil.copytree(REPOSITORY_ROOT, root, ignore=shutil.ignore_patterns(".git"))
+                reference = root / reference_path
+                lines = reference.read_text().splitlines(keepends=True)
+                mutated_lines = [
+                    line.replace(citation, "") if anchor in line else line for line in lines
+                ]
+                self.assertNotEqual(lines, mutated_lines)
+                reference.write_text("".join(mutated_lines))
+
+                result = self.run_validator(root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(
+                    f"{reference_path}: instruction '{anchor}' requires {citation}",
+                    result.stdout,
+                )
 
     def test_unused_source_fails(self) -> None:
         root = self.write_repository(valid_ledger())

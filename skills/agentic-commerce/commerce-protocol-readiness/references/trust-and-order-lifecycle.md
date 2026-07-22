@@ -14,7 +14,9 @@ Record evidence for each applicable row independently. Never infer a later row f
 | Payment authorization | The instrument or payment mandate is authorized for the specific checkout and amount. [SRC-AP2] | Product eligibility, inventory, fulfillment, or refund permission |
 | Merchant policy | The merchant allows the action under its eligibility, fraud, cancellation, return, refund, and escalation rules. | Identity or authorization from any principal |
 
-For action-capable endpoints, verify scopes and audience; expiry and revocation; least-privilege access; token binding; and proof that the presented credential belongs to the caller. Where OAuth DPoP is used, verify sender-constrained tokens, request binding, short proof lifetimes, and replay detection rather than treating proof possession alone as authorization. [SRC-OAUTH-DPOP]
+For action-capable endpoints, require authorization evidence scoped to the action, resource, amount, merchant, duration, and relevant constraints. Do not infer that authority from agent identity or payment authorization. [SRC-AP2]
+
+Where OAuth DPoP is used, verify sender-constrained tokens, request binding, short proof lifetimes, and replay detection rather than treating proof possession alone as authorization. [SRC-OAUTH-DPOP]
 
 Reject or downgrade action readiness when any applicable trust link is absent. A profile, endpoint, Agent Card, signing key, valid signature, access token, or payment credential proves only its own layer.
 
@@ -30,8 +32,9 @@ Reject or downgrade action readiness when any applicable trust link is absent. A
 
 - Authenticate order reads and verify signed lifecycle events before applying them. Confirm that the signer is authorized for that order, not merely that its signature is valid. [SRC-UCP]
 - Record confirmation, fulfillment, cancellation, return, refund, credit, dispute, and failed adjustment states. Enforce merchant policy and explicit approval boundaries before executing cancellation or money movement. [SRC-UCP]
-- Retry event delivery safely, deduplicate event identifiers, preserve monotonic or append-only history where supported, and reconcile webhook state against the merchant's authoritative order endpoint. [SRC-UCP]
-- Reconcile checkout, payment, receipt, and order identifiers and amounts. Route mismatches, stale sessions, ambiguous outcomes, and exhausted retries to human review; do not retry a potentially completed charge blindly.
+- Require unique webhook identifiers and retry failed deliveries. Prefer append-only fulfillment and adjustment histories where supported. [SRC-UCP]
+- Use the order's `checkout_id` to reconcile it with the originating checkout, and use authenticated Get Order responses to reconcile webhook state or retrieve it on demand. [SRC-UCP]
+- When AP2 applies, retain the applicable signed checkout and payment mandates plus the receipt so the authorization and transaction trail can be verified. [SRC-AP2]
 
 ## Evidence and scoring
 
