@@ -108,6 +108,8 @@ class ProductCatalogConsistencyTest(unittest.TestCase):
             "price",
             "currency",
             "availability",
+            "sale_timing",
+            "fulfillment_state",
         )
 
         for fact in action_changing_facts:

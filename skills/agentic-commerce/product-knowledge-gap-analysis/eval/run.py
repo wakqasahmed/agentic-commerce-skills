@@ -43,6 +43,8 @@ ACTION_CHANGING_FACTS = {
     "price",
     "currency",
     "availability",
+    "sale_timing",
+    "fulfillment_state",
 }
 MISMATCH_FIELDS = {
     "fact",
