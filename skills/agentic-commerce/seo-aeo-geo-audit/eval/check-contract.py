@@ -1,16 +1,47 @@
 #!/usr/bin/env python3
 """Offline, deterministic contract checks; this does not score agent outcomes."""
 import json
+import re
 from pathlib import Path
 
 EVAL_DIR = Path(__file__).resolve().parent
 SKILL = EVAL_DIR.parent / "SKILL.md"
 CASES = EVAL_DIR / "held-out-cases.json"
 TARGET_AGENT = EVAL_DIR / "run_target_agent.py"
-REQUIRED_SKILL_TEXT = (
+REQUIRED_STANDALONE_TEXT = (
+    "name: seo-aeo-geo-audit",
+    "## Workflow",
+    "Run the checks in `references/checks.md`",
+    "## Output",
     "cite the observed output for each finding",
     "Do not present an unverified crawl, schema, or content inference as an observed finding.",
     "do not make production changes during an audit.",
+)
+CANONICAL_AI_VISIBILITY_SKILLS = {
+    "ai-search-remediation-plan",
+    "ai-visibility-audit",
+    "answer-engine-content-audit",
+    "citation-readiness-audit",
+    "llms-txt-generator",
+    "robots-ai-crawler-audit",
+    "schema-markup-audit",
+    "sitemap-discovery-audit",
+}
+REQUIRED_SPECIALIST_DELEGATIONS = {
+    "answer-engine-content-audit",
+    "citation-readiness-audit",
+    "robots-ai-crawler-audit",
+    "schema-markup-audit",
+    "sitemap-discovery-audit",
+}
+REQUIRED_BOUNDARY_TEXT = (
+    "## Delegation",
+    "Observed storefront evidence",
+    "Specialist handoff recommendations",
+    "Remediation work",
+    "`../references/guardrails.md`",
+    "evidence provenance",
+    "autonomous action safety",
 )
 
 
@@ -25,9 +56,26 @@ def validate_contract() -> list[str]:
         if "workspace_request" not in runner or "run_target_agent" not in runner:
             failures.append("target-agent runner must pass workspace skill context to the target agent")
     skill = SKILL.read_text()
-    for text in REQUIRED_SKILL_TEXT:
+    for text in REQUIRED_STANDALONE_TEXT:
         if text not in skill:
-            failures.append(f"missing non-negotiable audit rule: {text}")
+            failures.append(f"missing standalone audit contract: {text}")
+    for text in REQUIRED_BOUNDARY_TEXT:
+        if text not in skill:
+            failures.append(f"missing delegation boundary: {text}")
+    delegation = skill.partition("## Delegation")[2].partition("## ")[0]
+    delegated_skills = set(re.findall(r"`([a-z0-9-]+)`", delegation))
+    missing_delegations = REQUIRED_SPECIALIST_DELEGATIONS - delegated_skills
+    unknown_delegations = delegated_skills - CANONICAL_AI_VISIBILITY_SKILLS
+    if missing_delegations:
+        failures.append(
+            "missing canonical AI Visibility delegations: "
+            + ", ".join(sorted(missing_delegations))
+        )
+    if unknown_delegations:
+        failures.append(
+            "unknown AI Visibility delegations: "
+            + ", ".join(sorted(unknown_delegations))
+        )
     cases = json.loads(CASES.read_text()).get("cases", [])
     ids, counts = set(), {"use": 0, "do_not_use": 0}
     for case in cases:

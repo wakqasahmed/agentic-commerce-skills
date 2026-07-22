@@ -29,6 +29,43 @@ for skill_name in safety_relevant_skills:
     if f"`{skill_name}`" not in guardrails:
         raise SystemExit(f"Shared guardrails do not define safety-relevant skill: {skill_name}")
 
+seo_audit_path = root / "skills/agentic-commerce/seo-aeo-geo-audit/SKILL.md"
+seo_audit = seo_audit_path.read_text()
+delegation = seo_audit.partition("## Delegation")[2].partition("## ")[0]
+if not delegation:
+    raise SystemExit("SEO/AEO/GEO audit must define an AI Visibility delegation section")
+
+canonical_ai_visibility_skills = {
+    "ai-search-remediation-plan",
+    "ai-visibility-audit",
+    "answer-engine-content-audit",
+    "citation-readiness-audit",
+    "llms-txt-generator",
+    "robots-ai-crawler-audit",
+    "schema-markup-audit",
+    "sitemap-discovery-audit",
+}
+required_specialist_delegations = {
+    "answer-engine-content-audit",
+    "citation-readiness-audit",
+    "robots-ai-crawler-audit",
+    "schema-markup-audit",
+    "sitemap-discovery-audit",
+}
+delegated_skills = set(re.findall(r"`([a-z0-9-]+)`", delegation))
+missing_delegations = required_specialist_delegations - delegated_skills
+unknown_delegations = delegated_skills - canonical_ai_visibility_skills
+if unknown_delegations:
+    raise SystemExit(
+        "unknown AI Visibility delegation: "
+        + ", ".join(sorted(unknown_delegations))
+    )
+if missing_delegations:
+    raise SystemExit(
+        "Missing canonical AI Visibility delegations: "
+        + ", ".join(sorted(missing_delegations))
+    )
+
 normalized_guardrails = " ".join(guardrails.split())
 autonomous_section = normalized_guardrails.partition("## Autonomous action safety")[2]
 autonomous_section = autonomous_section.partition("## ")[0]
