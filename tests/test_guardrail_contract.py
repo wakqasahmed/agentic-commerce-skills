@@ -9,15 +9,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR = Path("scripts/validate-plugin.py")
 GUARDRAILS = Path("skills/agentic-commerce/references/guardrails.md")
+SEO_AUDIT = Path("skills/agentic-commerce/seo-aeo-geo-audit/SKILL.md")
+SEO_CHECKS = Path("skills/agentic-commerce/seo-aeo-geo-audit/references/checks.md")
+SEO_CONTRACT = Path("skills/agentic-commerce/seo-aeo-geo-audit/eval/check-contract.py")
 MUTATIONS = json.loads(
     (ROOT / "tests/fixtures/guardrail-mutations.json").read_text()
 )
 
 
-class GuardrailContractTest(unittest.TestCase):
+class RepositoryContractTest(unittest.TestCase):
     def run_validator(self, root: Path) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
             ["python3", str(root / VALIDATOR)],
+            capture_output=True,
+            check=False,
+            text=True,
+        )
+
+    def run_seo_contract(self, root: Path) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["python3", str(root / SEO_CONTRACT)],
             capture_output=True,
             check=False,
             text=True,
@@ -65,6 +76,42 @@ class GuardrailContractTest(unittest.TestCase):
                         mutation["expected_error"],
                         result.stdout + result.stderr,
                     )
+
+    def test_unknown_ai_visibility_delegation_fails_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            mutated_root = Path(tmp) / "repository"
+            shutil.copytree(ROOT, mutated_root, ignore=shutil.ignore_patterns(".git"))
+            skill_path = mutated_root / SEO_AUDIT
+            skill = skill_path.read_text()
+            skill_path.write_text(
+                skill.replace(
+                    "`robots-ai-crawler-audit`",
+                    "`invented-crawler-audit`",
+                    1,
+                )
+            )
+
+            result = self.run_validator(mutated_root)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(
+                "unknown AI Visibility delegation: invented-crawler-audit",
+                result.stdout + result.stderr,
+            )
+
+    def test_missing_seo_checks_reference_fails_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            mutated_root = Path(tmp) / "repository"
+            shutil.copytree(ROOT, mutated_root, ignore=shutil.ignore_patterns(".git"))
+            (mutated_root / SEO_CHECKS).unlink()
+
+            result = self.run_seo_contract(mutated_root)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(
+                "missing SEO/AEO/GEO checks reference",
+                result.stdout + result.stderr,
+            )
 
 
 if __name__ == "__main__":
