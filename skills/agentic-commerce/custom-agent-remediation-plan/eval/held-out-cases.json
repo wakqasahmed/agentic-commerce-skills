@@ -38,6 +38,11 @@
       "fixture_type": "synthetic",
       "prompt": "An agent-readiness audit found no owner or handoff path for unresolved delivery claims. Propose the custom-agent remediation checklist.",
       "expected_skill_usage": "use",
+      "expected_plan_status": "HOLD",
+      "expected_missing_controls": [
+        "delivery-claim-escalation.accountable_operator",
+        "delivery-claim-escalation.human_escalation_path"
+      ],
       "audit_fixture": {"findings": [{"id": "delivery-claim-escalation", "bucket": "shared", "evidence_source": "support escalation queue", "operation_mode": "action_capable", "risk_level": "high"}]}
     },
     {
