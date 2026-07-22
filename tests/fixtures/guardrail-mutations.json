@@ -1,0 +1,20 @@
+[
+  {
+    "name": "missing payment safeguard",
+    "old": "and fraud controls",
+    "new": "",
+    "expected_error": "fraud controls"
+  },
+  {
+    "name": "weakened autonomous action gate",
+    "old": "Do not recommend autonomous checkout, payment, or support actions without",
+    "new": "Avoid recommending autonomous checkout, payment, or support actions without",
+    "expected_error": "hard gate"
+  },
+  {
+    "name": "alternative payment safeguards",
+    "old": "and fraud controls",
+    "new": "or fraud controls",
+    "expected_error": "all required"
+  }
+]
