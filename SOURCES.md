@@ -4,6 +4,22 @@ Normative, externally verifiable guidance uses stable source IDs in square brack
 
 Freshness window: 180 days.
 
+## SRC-SCHEMA-PRODUCT
+
+- Publisher: Schema.org
+- Official URL: https://schema.org/Product
+- Supported claim: Product markup supports product identifiers and product variant relationships, including SKU, GTIN, ProductGroup, and hasVariant properties.
+- Specification version: 30.0
+- Last verified: 2026-07-22
+
+## SRC-SCHEMA-OFFER
+
+- Publisher: Schema.org
+- Official URL: https://schema.org/Offer
+- Supported claim: Offer markup supports price, price currency, availability, price validity, and shipping or fulfillment-related properties.
+- Specification version: 30.0
+- Last verified: 2026-07-22
+
 ## SRC-ACP
 
 - Publisher: Agentic Commerce Protocol (OpenAI and Stripe)
