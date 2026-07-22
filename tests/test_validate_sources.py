@@ -70,6 +70,31 @@ Freshness window: 180 days.
         self.assertIn("malformed Official URL", result.stdout)
         self.assertIn("missing Last verified", result.stdout)
 
+    def test_malformed_source_headings_fail(self) -> None:
+        for source_id in ("src-test", "SRC--TEST"):
+            with self.subTest(source_id=source_id):
+                root = self.write_repository(
+                    valid_ledger().replace("## SRC-TEST", f"## {source_id}"),
+                    "Example guidance. [SRC-TEST]\n",
+                )
+
+                result = self.run_validator(root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(f"malformed source heading {source_id}", result.stdout)
+
+    def test_malformed_citations_fail(self) -> None:
+        for source_id in ("src-test", "SRC--TEST"):
+            with self.subTest(source_id=source_id):
+                root = self.write_repository(
+                    valid_ledger(), f"Example guidance. [{source_id}]\n"
+                )
+
+                result = self.run_validator(root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(f"malformed citation {source_id}", result.stdout)
+
     def test_stale_source_warns_without_failing(self) -> None:
         root = self.write_repository(
             valid_ledger(last_verified="2020-01-01"),

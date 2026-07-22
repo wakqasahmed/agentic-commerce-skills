@@ -5,8 +5,9 @@ from datetime import date
 from pathlib import Path
 
 
-SOURCE_HEADING = re.compile(r"^## (SRC-[A-Z0-9-]+)$", re.MULTILINE)
-CITATION = re.compile(r"\[(SRC-[A-Z0-9-]+)\]")
+SOURCE_ID = re.compile(r"SRC-[A-Z0-9]+(?:-[A-Z0-9]+)*")
+SOURCE_HEADING = re.compile(r"^##[ \t]+(.+?)[ \t]*$", re.MULTILINE)
+CITATION = re.compile(r"\[(SRC[^\]\n]*)\]", re.IGNORECASE)
 REQUIRED_FIELDS = (
     "Publisher",
     "Official URL",
@@ -35,6 +36,9 @@ def parse_ledger(ledger: Path) -> tuple[dict[str, dict[str, str]], int, list[str
 
     for index, heading in enumerate(headings):
         source_id = heading.group(1)
+        if not SOURCE_ID.fullmatch(source_id):
+            errors.append(f"malformed source heading {source_id}")
+            continue
         end = headings[index + 1].start() if index + 1 < len(headings) else len(text)
         body = text[heading.end() : end]
         fields = dict(re.findall(r"^- ([A-Za-z ]+):\s*(.+)$", body, re.MULTILINE))
@@ -61,19 +65,25 @@ def parse_ledger(ledger: Path) -> tuple[dict[str, dict[str, str]], int, list[str
     return entries, freshness_days, errors
 
 
-def markdown_citations(root: Path) -> set[str]:
+def markdown_citations(root: Path) -> tuple[set[str], list[str]]:
     citations: set[str] = set()
+    malformed: set[str] = set()
     for markdown_file in root.rglob("*.md"):
         if markdown_file.name == "SOURCES.md" or ".git" in markdown_file.parts:
             continue
-        citations.update(CITATION.findall(markdown_file.read_text()))
-    return citations
+        for citation in CITATION.findall(markdown_file.read_text()):
+            if SOURCE_ID.fullmatch(citation):
+                citations.add(citation)
+            else:
+                malformed.add(citation)
+    return citations, [f"malformed citation {citation}" for citation in sorted(malformed)]
 
 
 def main() -> int:
     root = parse_arguments().root.resolve()
     entries, freshness_days, errors = parse_ledger(root / "SOURCES.md")
-    citations = markdown_citations(root)
+    citations, citation_errors = markdown_citations(root)
+    errors.extend(citation_errors)
 
     for source_id in sorted(citations - entries.keys()):
         errors.append(f"unregistered citation {source_id}")

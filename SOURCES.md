@@ -55,9 +55,9 @@ Freshness window: 180 days.
 ## SRC-A2A
 
 - Publisher: A2A Protocol Working Group
-- Official URL: https://a2a-protocol.org/dev/specification/
+- Official URL: https://a2a-protocol.org/latest/specification/
 - Supported claim: A2A servers publish an Agent Card describing identity, capabilities, skills, interfaces, and authentication, conventionally at `/.well-known/agent-card.json`.
-- Specification version: Current development specification
+- Specification version: 1.0.0
 - Last verified: 2026-07-22
 
 ## SRC-WEBMCP
@@ -65,7 +65,7 @@ Freshness window: 180 days.
 - Publisher: W3C Web Machine Learning Community Group
 - Official URL: https://webmachinelearning.github.io/webmcp/
 - Supported claim: WebMCP is a draft browser API through which documents expose JavaScript-based tools to browser agents.
-- Specification version: Draft Community Group Report, 2026-07-20
+- Specification version: Draft Community Group Report, 2026-07-21
 - Last verified: 2026-07-22
 
 ## SRC-TAP
