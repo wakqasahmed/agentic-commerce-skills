@@ -1,6 +1,8 @@
 import importlib.util
 import json
+import re
 import subprocess
+import tempfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
@@ -13,6 +15,31 @@ COMPLETE_FIXTURE = (
     ROOT
     / "skills/agentic-commerce/custom-agent-remediation-plan/eval/fixtures/complete-action-plan.json"
 )
+READ_ONLY_FIXTURE = (
+    ROOT
+    / "skills/agentic-commerce/custom-agent-remediation-plan/eval/fixtures/read-only-content-plan.json"
+)
+CHECKS = (
+    ROOT
+    / "skills/agentic-commerce/custom-agent-remediation-plan/references/checks.md"
+)
+REQUIRED_OPERATIONAL_CONTROLS = (
+    "trace_or_correlation_ids",
+    "authorization_evidence",
+    "audit_events",
+    "idempotency_or_deduplication",
+    "reconciliation_checks",
+    "retained_failure_evidence",
+    "health_signals",
+    "alert_thresholds",
+    "accountable_operator",
+    "human_escalation_path",
+    "disable_or_kill_switch",
+    "rollback_or_recovery_procedure",
+    "safe_dependency_fallback",
+    "approval_workflow",
+    "policy_grounding",
+)
 
 
 def load_grader():
@@ -24,6 +51,31 @@ def load_grader():
 
 def load_complete_item() -> dict:
     return json.loads(COMPLETE_FIXTURE.read_text())["plan"][0]
+
+
+def load_substantive_check() -> str:
+    checks = CHECKS.read_text()
+    match = re.search(
+        r"Then reject placeholders and uncheckable operational promises:\n\n"
+        r"```bash\n(jq -e '(.*?)' \"\$PLAN\")\n```",
+        checks,
+        re.DOTALL,
+    )
+    if match is None:
+        raise AssertionError("checks.md must publish the substantive jq gate")
+    return match.group(2)
+
+
+def run_substantive_check(plan: list[dict]) -> subprocess.CompletedProcess:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json") as plan_file:
+        json.dump(plan, plan_file)
+        plan_file.flush()
+        return subprocess.run(
+            ["jq", "-e", load_substantive_check(), plan_file.name],
+            capture_output=True,
+            check=False,
+            text=True,
+        )
 
 
 class CustomAgentRemediationPlanEvalTest(unittest.TestCase):
@@ -111,6 +163,58 @@ class CustomAgentRemediationPlanEvalTest(unittest.TestCase):
             "submit-order.policy_grounding)",
             self.result.stdout,
         )
+
+
+class CustomAgentRemediationPlanChecklistTest(unittest.TestCase):
+    def test_substantive_gate_accepts_complete_action_plan(self) -> None:
+        plan = json.loads(COMPLETE_FIXTURE.read_text())["plan"]
+
+        result = run_substantive_check(plan)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_substantive_gate_accepts_read_only_plan_without_action_controls(self) -> None:
+        plan = json.loads(READ_ONLY_FIXTURE.read_text())["plan"]
+
+        result = run_substantive_check(plan)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_substantive_gate_rejects_future_promise_for_every_control(self) -> None:
+        complete_item = load_complete_item()
+        self.assertEqual(
+            set(complete_item["operational_controls"]),
+            set(REQUIRED_OPERATIONAL_CONTROLS),
+        )
+
+        for field in REQUIRED_OPERATIONAL_CONTROLS:
+            with self.subTest(field=field):
+                item = deepcopy(complete_item)
+                item["operational_controls"][field] = f"Add {field} later."
+
+                result = run_substantive_check([item])
+
+                self.assertNotEqual(
+                    result.returncode,
+                    0,
+                    f"checks.md accepted vague {field}",
+                )
+
+    def test_substantive_gate_rejects_uncheckable_value_for_every_control(self) -> None:
+        complete_item = load_complete_item()
+
+        for field in REQUIRED_OPERATIONAL_CONTROLS:
+            with self.subTest(field=field):
+                item = deepcopy(complete_item)
+                item["operational_controls"][field] = "Configured."
+
+                result = run_substantive_check([item])
+
+                self.assertNotEqual(
+                    result.returncode,
+                    0,
+                    f"checks.md accepted uncheckable {field}",
+                )
 
 
 class CustomAgentRemediationPlanHarnessGraderTest(unittest.TestCase):
