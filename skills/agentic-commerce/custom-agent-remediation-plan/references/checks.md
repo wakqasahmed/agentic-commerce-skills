@@ -42,8 +42,9 @@ jq -e '
   def substantive:
     type == "string" and length > 0 and
     ((ascii_downcase | sub("[.!]$"; "")) as $value |
-      ["tbd", "todo", "pending", "unknown", "n/a", "na", "none", "later"] |
+      ["tbd", "todo", "pending", "unknown", "n/a", "na", "none", "later", "not applicable", "to be determined"] |
       index($value) | not) and
+    (test("\\b(tbd|todo|not applicable|to be determined)\\b|(^|[^[:alnum:]_])n/a([^[:alnum:]_]|$)|\\b(pending|unknown|none|later)[.!]?[[:space:]]*$"; "i") | not) and
     (test("\\b(add|define|document|establish|implement|specify|set up)\\b.{0,100}\\b(eventually|future|later|pending|tbd|to be determined)\\b"; "i") | not);
   def checkable($pattern): substantive and test($pattern; "i");
   all(.[];

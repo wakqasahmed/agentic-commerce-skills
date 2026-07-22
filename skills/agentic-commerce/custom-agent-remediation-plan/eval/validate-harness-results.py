@@ -23,8 +23,14 @@ OPERATIONAL_CONTROLS = (
 )
 PLACEHOLDERS = {
     "later", "n/a", "na", "none", "not applicable", "pending", "tbd",
-    "todo", "unknown",
+    "to be determined", "todo", "unknown",
 }
+PLACEHOLDER_PATTERN = re.compile(
+    r"\b(?:tbd|todo|not applicable|to be determined)\b|"
+    r"(?<!\w)n/a(?!\w)|"
+    r"\b(?:pending|unknown|none|later)\s*[.!]?\s*$",
+    re.I,
+)
 CONTROL_PATTERNS = {
     "trace_or_correlation_ids": re.compile(r"\b(?:correlation|trace)\s+(?:id|identifier|key)s?\b", re.I),
     "authorization_evidence": re.compile(r"(?=.*\b(?:approv\w*|authoriz\w*|permission|policy decision)\b)(?=.*\b(?:actor|decision|evidence|identity|record|retain|store)\w*\b)", re.I),
@@ -52,7 +58,8 @@ VAGUE_FUTURE_PATTERN = re.compile(
 def has_value(value: object) -> bool:
     if not isinstance(value, str) or not value.strip():
         return False
-    return value.strip().lower().rstrip(".!") not in PLACEHOLDERS
+    normalized = value.strip().lower().rstrip(".!")
+    return normalized not in PLACEHOLDERS and not PLACEHOLDER_PATTERN.search(value)
 
 
 def has_checkable_control(field: str, value: object) -> bool:

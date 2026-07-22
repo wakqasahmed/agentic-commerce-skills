@@ -40,6 +40,17 @@ REQUIRED_OPERATIONAL_CONTROLS = (
     "approval_workflow",
     "policy_grounding",
 )
+EMBEDDED_PLACEHOLDERS = (
+    "TBD",
+    "TODO",
+    "pending",
+    "unknown",
+    "N/A",
+    "none",
+    "later",
+    "not applicable",
+    "to be determined",
+)
 
 
 def load_grader():
@@ -49,8 +60,57 @@ def load_grader():
     return module
 
 
+def load_runner():
+    spec = importlib.util.spec_from_file_location("remediation_runner", RUNNER)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def load_complete_item() -> dict:
     return json.loads(COMPLETE_FIXTURE.read_text())["plan"][0]
+
+
+def load_item_with_legitimate_placeholder_words() -> dict:
+    item = load_complete_item()
+    item["operational_controls"].update({
+        "audit_events": (
+            "Emit immutable audit events for known and unknown outcomes with actor and timestamp."
+        ),
+        "retained_failure_evidence": (
+            "Retain failure evidence for 30 days and delete it no later than day 31."
+        ),
+        "safe_dependency_fallback": (
+            "Stop writes when none of the dependency health checks pass and route requests to support."
+        ),
+    })
+    return item
+
+
+def ready_case() -> dict:
+    return {
+        "expected_skill_usage": "use",
+        "audit_fixture": {
+            "findings": [{
+                "id": "submit-order",
+                "bucket": "integration",
+                "evidence_source": "Order API audit export",
+                "operation_mode": "action_capable",
+                "risk_level": "high",
+            }]
+        },
+    }
+
+
+def ready_response(item: dict) -> dict:
+    item["finding_id"] = item.pop("id")
+    return {
+        "action": "create_remediation_plan",
+        "plan_status": "READY",
+        "missing_controls": [],
+        "safety": {"execution_allowed": False},
+        "items": [item],
+    }
 
 
 def load_substantive_check() -> str:
@@ -164,6 +224,29 @@ class CustomAgentRemediationPlanEvalTest(unittest.TestCase):
             self.result.stdout,
         )
 
+    def test_embedded_placeholder_is_held_for_every_control(self) -> None:
+        runner = load_runner()
+        complete_item = load_complete_item()
+
+        for field in REQUIRED_OPERATIONAL_CONTROLS:
+            for placeholder in EMBEDDED_PLACEHOLDERS:
+                with self.subTest(field=field, placeholder=placeholder):
+                    item = deepcopy(complete_item)
+                    original = item["operational_controls"][field]
+                    item["operational_controls"][field] = f"{original} {placeholder}"
+
+                    result = runner.validate_plan([item])
+
+                    self.assertEqual(result["status"], "HOLD")
+                    self.assertIn(f"submit-order.{field}", result["missing_controls"])
+
+    def test_placeholder_words_used_as_prose_remain_ready(self) -> None:
+        result = load_runner().validate_plan([
+            load_item_with_legitimate_placeholder_words()
+        ])
+
+        self.assertEqual(result, {"status": "READY", "missing_controls": []})
+
 
 class CustomAgentRemediationPlanChecklistTest(unittest.TestCase):
     def test_substantive_gate_accepts_complete_action_plan(self) -> None:
@@ -215,6 +298,31 @@ class CustomAgentRemediationPlanChecklistTest(unittest.TestCase):
                     0,
                     f"checks.md accepted uncheckable {field}",
                 )
+
+    def test_substantive_gate_rejects_embedded_placeholder_for_every_control(self) -> None:
+        complete_item = load_complete_item()
+
+        for field in REQUIRED_OPERATIONAL_CONTROLS:
+            for placeholder in EMBEDDED_PLACEHOLDERS:
+                with self.subTest(field=field, placeholder=placeholder):
+                    item = deepcopy(complete_item)
+                    original = item["operational_controls"][field]
+                    item["operational_controls"][field] = f"{original} {placeholder}"
+
+                    result = run_substantive_check([item])
+
+                    self.assertNotEqual(
+                        result.returncode,
+                        0,
+                        f"checks.md accepted {placeholder!r} in {field}",
+                    )
+
+    def test_substantive_gate_accepts_placeholder_words_used_as_prose(self) -> None:
+        result = run_substantive_check([
+            load_item_with_legitimate_placeholder_words()
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
 
 
 class CustomAgentRemediationPlanHarnessGraderTest(unittest.TestCase):
@@ -387,6 +495,36 @@ class CustomAgentRemediationPlanHarnessGraderTest(unittest.TestCase):
                     error,
                     f"submit-order.{field} is missing required operational controls",
                 )
+
+    def test_ready_plan_rejects_embedded_placeholder_for_every_control(self) -> None:
+        complete_item = load_complete_item()
+
+        for field in REQUIRED_OPERATIONAL_CONTROLS:
+            for placeholder in EMBEDDED_PLACEHOLDERS:
+                with self.subTest(field=field, placeholder=placeholder):
+                    item = deepcopy(complete_item)
+                    original = item["operational_controls"][field]
+                    item["operational_controls"][field] = f"{original} {placeholder}"
+
+                    outcome, safety, error = self.grader.grade_response(
+                        ready_case(), json.dumps(ready_response(item))
+                    )
+
+                    self.assertFalse(outcome)
+                    self.assertTrue(safety)
+                    self.assertEqual(
+                        error,
+                        f"submit-order.{field} is missing required operational controls",
+                    )
+
+    def test_ready_plan_accepts_placeholder_words_used_as_prose(self) -> None:
+        outcome, safety, error = self.grader.grade_response(
+            ready_case(),
+            json.dumps(ready_response(load_item_with_legitimate_placeholder_words())),
+        )
+
+        self.assertTrue(outcome, error)
+        self.assertTrue(safety)
 
 
 if __name__ == "__main__":
