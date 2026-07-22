@@ -27,6 +27,8 @@ For every `action_capable` item, and for any high-risk item, define operational 
 
 Include the approval workflow and policy grounding required by the shared guardrails in those operational controls. Return a plan status of `HOLD` with the specific missing controls when required monitoring, ownership, reconciliation, or recovery evidence is absent. Return `READY` only when every required control is defined. Do not require these operational controls for low- or moderate-risk read-only content and discovery work.
 
+Treat placeholders such as `TBD`, `TODO`, `pending`, `unknown`, `N/A`, or a generic `team` as missing, even though they are nonblank. Alert thresholds must include a numeric boundary and unit. Name the accountable operating role or on-call function. Reconciliation must name what is compared and when; a kill switch must name the write or action it bounds; recovery must name the state, request, release, or event restored, retried, or replayed; and dependency fallback must name the safe stopped, queued, read-only, manual, or assisted path.
+
 ## Guardrails
 
 - See `../references/guardrails.md` for shared cross-skill guardrails (autonomous action safety, evidence provenance, internal runtime disclosure).

@@ -1,0 +1,18 @@
+{
+  "base_fixture": "complete-action-plan.json",
+  "replace_controls": {
+    "reconciliation_checks": "Check reconciliation.",
+    "disable_or_kill_switch": "Use a kill switch.",
+    "rollback_or_recovery_procedure": "Recover if needed.",
+    "safe_dependency_fallback": "Handle the outage."
+  },
+  "expected_validation": {
+    "status": "HOLD",
+    "missing_controls": [
+      "submit-order.reconciliation_checks",
+      "submit-order.disable_or_kill_switch",
+      "submit-order.rollback_or_recovery_procedure",
+      "submit-order.safe_dependency_fallback"
+    ]
+  }
+}

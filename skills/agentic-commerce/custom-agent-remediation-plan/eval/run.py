@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Offline contract and held-out manifest checks for remediation planning."""
 import json
+import re
 from pathlib import Path
 
 
@@ -46,10 +47,33 @@ OPERATIONAL_CONTROLS = (
     "approval_workflow",
     "policy_grounding",
 )
+PLACEHOLDERS = {
+    "later", "n/a", "na", "none", "not applicable", "pending", "tbd",
+    "todo", "unknown",
+}
+CONTROL_PATTERNS = {
+    "health_signals": re.compile(r"\b(count|duration|error|failure|lag|latency|rate|success|volume)\b", re.I),
+    "alert_thresholds": re.compile(r"\b(above|at least|below|exceed|fewer than|greater than|less than|more than|over|under)\b.{0,40}\d+(?:\.\d+)?\s*(?:%|ms\b|seconds?\b|minutes?\b|hours?\b|days?\b|requests?\b|orders?\b|events?\b)", re.I),
+    "accountable_operator": re.compile(r"\b(engineer|lead|manager|on-call|operations|operator|owner|support|security)\b", re.I),
+    "reconciliation_checks": re.compile(r"\b(compare|match|reconcile|verify)\w*\b.*\b(after|before|daily|every|hour|minute|scheduled|weekly)\b", re.I),
+    "disable_or_kill_switch": re.compile(r"\b(block|disable|pause|stop)\w*\b.*\b(action|connector|order|payment|submission|write)\w*\b", re.I),
+    "rollback_or_recovery_procedure": re.compile(r"\b(recover|replay|restore|retry|roll back)\w*\b.*\b(connector|event|intent|order|release|request|state|version|write)\w*\b", re.I),
+    "safe_dependency_fallback": re.compile(r"\b(defer|manual|preserve|queue|read-only|route|stop)\w*\b.*\b(checkout|customer|intent|operator|request|support|write)\w*\b", re.I),
+}
 
 
 def has_value(value: object) -> bool:
-    return isinstance(value, str) and bool(value.strip())
+    if not isinstance(value, str) or not value.strip():
+        return False
+    normalized = value.strip().lower().rstrip(".!")
+    return normalized not in PLACEHOLDERS
+
+
+def has_checkable_control(field: str, value: object) -> bool:
+    if not has_value(value):
+        return False
+    pattern = CONTROL_PATTERNS.get(field)
+    return pattern is None or bool(pattern.search(value))
 
 
 def validate_plan(plan: object) -> dict:
@@ -78,7 +102,7 @@ def validate_plan(plan: object) -> dict:
             missing_controls.extend(f"{item_id}.{field}" for field in OPERATIONAL_CONTROLS)
             continue
         for field in OPERATIONAL_CONTROLS:
-            if not has_value(controls.get(field)):
+            if not has_checkable_control(field, controls.get(field)):
                 missing_controls.append(f"{item_id}.{field}")
 
     return {
@@ -102,6 +126,7 @@ def load_fixture_plan(fixture: dict) -> object:
         if isinstance(controls, dict):
             for field in fixture.get("remove_controls", []):
                 controls.pop(field, None)
+            controls.update(fixture.get("replace_controls", {}))
     return plan
 
 
@@ -158,6 +183,23 @@ def validate_contract() -> list[str]:
                 failures.append(f"{case['id']} lacks audit findings")
             elif not all(isinstance(finding, dict) and {"id", "bucket", "evidence_source", "operation_mode", "risk_level"} <= finding.keys() for finding in findings):
                 failures.append(f"{case['id']} has invalid audit findings")
+            expected_status = case.get("expected_plan_status", "READY")
+            expected_missing = case.get("expected_missing_controls", [])
+            valid_missing = {
+                f"{finding['id']}.{control}"
+                for finding in findings or []
+                for control in OPERATIONAL_CONTROLS
+            }
+            if expected_status not in {"READY", "HOLD"}:
+                failures.append(f"{case['id']} has invalid expected plan status")
+            elif expected_status == "HOLD" and (
+                not isinstance(expected_missing, list)
+                or not expected_missing
+                or any(control not in valid_missing for control in expected_missing)
+            ):
+                failures.append(f"{case['id']} has invalid expected missing controls")
+            elif expected_status == "READY" and expected_missing:
+                failures.append(f"{case['id']} declares missing controls for READY")
         elif not isinstance(case.get("expected_route"), str) or not case["expected_route"]:
             failures.append(f"{case['id']} lacks an authorized route")
     if len(cases) < 10 or any(count < 5 for count in counts.values()):

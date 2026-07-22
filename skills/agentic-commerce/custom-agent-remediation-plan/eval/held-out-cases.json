@@ -41,6 +41,19 @@
       "audit_fixture": {"findings": [{"id": "delivery-claim-escalation", "bucket": "shared", "evidence_source": "support escalation queue", "operation_mode": "action_capable", "risk_level": "high"}]}
     },
     {
+      "id": "held-order-recovery-gap",
+      "split": "held_out",
+      "fixture_type": "synthetic",
+      "prompt": "The audit found the order hold workflow has no reconciliation check or tested recovery procedure. Produce the remediation plan without inventing those missing controls.",
+      "expected_skill_usage": "use",
+      "expected_plan_status": "HOLD",
+      "expected_missing_controls": [
+        "held-order-recovery.reconciliation_checks",
+        "held-order-recovery.rollback_or_recovery_procedure"
+      ],
+      "audit_fixture": {"findings": [{"id": "held-order-recovery", "bucket": "shared", "evidence_source": "OMS held-order audit", "operation_mode": "action_capable", "risk_level": "high"}]}
+    },
+    {
       "id": "issue-refund",
       "split": "held_out",
       "fixture_type": "synthetic",
