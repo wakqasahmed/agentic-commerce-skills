@@ -36,7 +36,7 @@ class GuardrailContractTest(unittest.TestCase):
                     shutil.copytree(ROOT, mutated_root, ignore=shutil.ignore_patterns(".git"))
                     guardrails_path = mutated_root / GUARDRAILS
                     guardrails = guardrails_path.read_text()
-                    self.assertIn(mutation["old"], guardrails)
+                    self.assertEqual(guardrails.count(mutation["old"]), 1)
                     guardrails_path.write_text(
                         guardrails.replace(mutation["old"], mutation["new"], 1)
                     )

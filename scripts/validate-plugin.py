@@ -32,6 +32,8 @@ for skill_name in safety_relevant_skills:
 normalized_guardrails = " ".join(guardrails.split())
 autonomous_section = normalized_guardrails.partition("## Autonomous action safety")[2]
 autonomous_section = autonomous_section.partition("## ")[0]
+evidence_section = normalized_guardrails.partition("## Evidence provenance")[2]
+evidence_section = evidence_section.partition("## ")[0]
 sentences = [sentence.strip() for sentence in re.split(r"(?<=[.!?])\s+", autonomous_section)]
 action_sentence = next(
     (sentence for sentence in sentences if "autonomous checkout" in sentence.lower()),
@@ -40,6 +42,24 @@ action_sentence = next(
 payment_sentence = next(
     (sentence for sentence in sentences if "autonomous payment execution" in sentence.lower()),
     "",
+)
+evidence_sentence = next(
+    (
+        sentence.strip()
+        for sentence in re.split(r"(?<=[.!?])\s+", evidence_section)
+        if "public-signal evidence" in sentence.lower()
+    ),
+    "",
+)
+permissive_safeguard_language = (
+    " or ",
+    "unless",
+    "except",
+    "optional",
+    "instead",
+    "alternative",
+    "where practical",
+    "if possible",
 )
 
 if not action_sentence.startswith("Do not recommend ") or " without " not in action_sentence:
@@ -66,16 +86,15 @@ required_action_safeguards = (
 for safeguard in required_action_safeguards:
     if safeguard not in action_preconditions:
         raise SystemExit(f"Shared hard gate requires {safeguard}")
-if " or " in action_preconditions:
+if any(term in action_preconditions for term in permissive_safeguard_language):
     raise SystemExit("Shared hard gate safeguards must remain all required, not alternatives")
 
-required_guardrails = (
-    "public-signal evidence",
-    "verified exports",
+evidence_requirement = (
+    "Label findings as public-signal evidence unless the user has explicitly provided "
+    "verified exports"
 )
-for guardrail in required_guardrails:
-    if guardrail not in guardrails:
-        raise SystemExit(f"Shared guardrails require {guardrail}")
+if not evidence_sentence.startswith(evidence_requirement):
+    raise SystemExit("Evidence provenance must distinguish public signals from verified exports")
 
 payment_safeguards = (
     "identity verification",
@@ -90,20 +109,10 @@ for safeguard in payment_safeguards:
 
 payment_requirement = "requires all of the following before it is recommended:"
 payment_preconditions = payment_sentence.partition(payment_requirement)[2].lower()
-permissive_payment_language = (
-    " or ",
-    "unless",
-    "except",
-    "optional",
-    "instead",
-    "alternative",
-    "where practical",
-    "if possible",
-)
 if (
     payment_requirement not in payment_sentence
     or not payment_preconditions
-    or any(term in payment_preconditions for term in permissive_payment_language)
+    or any(term in payment_preconditions for term in permissive_safeguard_language)
 ):
     raise SystemExit("Shared payment safeguards must remain all required, not alternatives")
 
