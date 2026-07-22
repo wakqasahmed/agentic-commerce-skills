@@ -24,7 +24,7 @@ Freshness window: 180 days.
 
 - Publisher: Agent Payments Protocol
 - Official URL: https://ap2-protocol.org/ap2/specification/
-- Supported claim: AP2 separates role verification and secures agent-performed payments with scoped, signed checkout and payment mandates bound to a merchant-signed checkout, plus receipts.
+- Supported claim: AP2 separates role verification and secures agent-performed payments with scoped, signed checkout and payment mandates bound to a merchant-signed checkout, plus receipts. Its direct flow returns a payment credential after the Credential Provider validates the Payment Mandate, passes the credential and Checkout Mandate to the Merchant, and requires the Merchant Payment Processor to validate that the credential is scoped to the Checkout; transport and API details remain the commerce protocol's responsibility.
 - Specification version: 0.2
 - Last verified: 2026-07-22
 

@@ -32,6 +32,11 @@ REQUIRED_CITATIONS = (
     ),
     (
         TRUST_AND_ORDER_REFERENCE,
+        "For payment handoff, verify",
+        ("SRC-AP2",),
+    ),
+    (
+        TRUST_AND_ORDER_REFERENCE,
         "Use the order's `checkout_id`",
         ("SRC-UCP",),
     ),

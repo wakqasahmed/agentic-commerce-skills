@@ -60,6 +60,7 @@ class SourceValidatorTest(unittest.TestCase):
         mutations = (
             ("For action-capable endpoints, require authorization evidence", "[SRC-AP2]"),
             ("Where OAuth DPoP is used", "[SRC-OAUTH-DPOP]"),
+            ("For payment handoff, verify", "[SRC-AP2]"),
             ("Use the order's `checkout_id`", "[SRC-UCP]"),
             ("When AP2 applies", "[SRC-AP2]"),
         )

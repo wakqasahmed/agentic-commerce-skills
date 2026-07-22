@@ -25,7 +25,7 @@ Reject or downgrade action readiness when any applicable trust link is absent. A
 - Recalculate price, discounts, tax, shipping, fees, currency, and inventory from merchant-authoritative state before completion. Escalate mismatched totals for buyer review; do not silently alter or autonomously accept them. [SRC-UCP] [SRC-AP2]
 - Bind consent or a mandate to the finalized checkout. AP2 separately binds checkout and payment mandates to the merchant-signed checkout and requires the relevant verifier to validate each role's evidence. [SRC-AP2]
 - Honor checkout expiry and terminal states. Provide a buyer handoff for required input or review, and confirm the resulting order through a merchant-issued order identifier or receipt. [SRC-UCP] [SRC-AP2]
-- Hand payment credentials only to the intended merchant or processor over the protocol's secure handoff, with the authorized amount and checkout binding preserved. [SRC-AP2]
+- For payment handoff, verify the Credential Provider returns a checkout-scoped payment credential only after validating the Payment Mandate; the Shopping Agent provides that credential and the Checkout Mandate to the Merchant; and the Merchant Payment Processor validates that the credential is scoped to the Checkout. AP2 v0.2 leaves transport and API details to the commerce protocol. [SRC-AP2]
 - Make completion, cancellation, payment, refund, and other state-changing retries idempotent. Bind idempotency keys into signed requests where the protocol specifies that behavior, and return the prior result without repeating the side effect. [SRC-UCP]
 
 ## Post-checkout lifecycle
