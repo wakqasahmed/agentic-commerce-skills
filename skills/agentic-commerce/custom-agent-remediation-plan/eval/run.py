@@ -61,6 +61,8 @@ PLACEHOLDERS = {
 PLACEHOLDER_PATTERN = re.compile(
     r"\b(?:tbd|todo|not applicable|to be determined)\b|"
     r"(?<!\w)n/a(?!\w)|"
+    r"\bpending\s+(?:(?:final|human|operator|owner|security|support|team)\s+)?"
+    r"(?:approval|confirmation|decision|review|sign-?off|validation|verification)\b|"
     r"\b(?:pending|unknown|none|later)\s*[.!]?\s*$",
     re.I,
 )

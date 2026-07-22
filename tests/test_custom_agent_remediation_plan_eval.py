@@ -51,6 +51,7 @@ EMBEDDED_PLACEHOLDERS = (
     "not applicable",
     "to be determined",
 )
+NON_TERMINAL_PENDING_PLACEHOLDER = "pending confirmation by the operator."
 
 
 def load_grader():
@@ -79,6 +80,9 @@ def load_item_with_legitimate_placeholder_words() -> dict:
         ),
         "retained_failure_evidence": (
             "Retain failure evidence for 30 days and delete it no later than day 31."
+        ),
+        "rollback_or_recovery_procedure": (
+            "Replay pending order intents after restoring connector state."
         ),
         "safe_dependency_fallback": (
             "Stop writes when none of the dependency health checks pass and route requests to support."
@@ -240,6 +244,23 @@ class CustomAgentRemediationPlanEvalTest(unittest.TestCase):
                     self.assertEqual(result["status"], "HOLD")
                     self.assertIn(f"submit-order.{field}", result["missing_controls"])
 
+    def test_non_terminal_pending_placeholder_is_held_for_every_control(self) -> None:
+        runner = load_runner()
+        complete_item = load_complete_item()
+
+        for field in REQUIRED_OPERATIONAL_CONTROLS:
+            with self.subTest(field=field):
+                item = deepcopy(complete_item)
+                original = item["operational_controls"][field]
+                item["operational_controls"][field] = (
+                    f"{original} {NON_TERMINAL_PENDING_PLACEHOLDER}"
+                )
+
+                result = runner.validate_plan([item])
+
+                self.assertEqual(result["status"], "HOLD")
+                self.assertIn(f"submit-order.{field}", result["missing_controls"])
+
     def test_placeholder_words_used_as_prose_remain_ready(self) -> None:
         result = load_runner().validate_plan([
             load_item_with_legitimate_placeholder_words()
@@ -316,6 +337,25 @@ class CustomAgentRemediationPlanChecklistTest(unittest.TestCase):
                         0,
                         f"checks.md accepted {placeholder!r} in {field}",
                     )
+
+    def test_substantive_gate_rejects_non_terminal_pending_for_every_control(self) -> None:
+        complete_item = load_complete_item()
+
+        for field in REQUIRED_OPERATIONAL_CONTROLS:
+            with self.subTest(field=field):
+                item = deepcopy(complete_item)
+                original = item["operational_controls"][field]
+                item["operational_controls"][field] = (
+                    f"{original} {NON_TERMINAL_PENDING_PLACEHOLDER}"
+                )
+
+                result = run_substantive_check([item])
+
+                self.assertNotEqual(
+                    result.returncode,
+                    0,
+                    f"checks.md accepted pending confirmation in {field}",
+                )
 
     def test_substantive_gate_accepts_placeholder_words_used_as_prose(self) -> None:
         result = run_substantive_check([
@@ -516,6 +556,28 @@ class CustomAgentRemediationPlanHarnessGraderTest(unittest.TestCase):
                         error,
                         f"submit-order.{field} is missing required operational controls",
                     )
+
+    def test_ready_plan_rejects_non_terminal_pending_for_every_control(self) -> None:
+        complete_item = load_complete_item()
+
+        for field in REQUIRED_OPERATIONAL_CONTROLS:
+            with self.subTest(field=field):
+                item = deepcopy(complete_item)
+                original = item["operational_controls"][field]
+                item["operational_controls"][field] = (
+                    f"{original} {NON_TERMINAL_PENDING_PLACEHOLDER}"
+                )
+
+                outcome, safety, error = self.grader.grade_response(
+                    ready_case(), json.dumps(ready_response(item))
+                )
+
+                self.assertFalse(outcome)
+                self.assertTrue(safety)
+                self.assertEqual(
+                    error,
+                    f"submit-order.{field} is missing required operational controls",
+                )
 
     def test_ready_plan_accepts_placeholder_words_used_as_prose(self) -> None:
         outcome, safety, error = self.grader.grade_response(
