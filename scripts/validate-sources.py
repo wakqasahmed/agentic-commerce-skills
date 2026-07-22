@@ -56,9 +56,12 @@ def parse_ledger(ledger: Path) -> tuple[dict[str, dict[str, str]], int, list[str
         verified = fields.get("Last verified", "")
         if verified:
             try:
-                date.fromisoformat(verified)
+                verified_date = date.fromisoformat(verified)
             except ValueError:
                 errors.append(f"{source_id}: malformed Last verified date")
+            else:
+                if verified_date > date.today():
+                    errors.append(f"{source_id}: Last verified date is in the future")
 
     if not headings:
         errors.append("SOURCES.md contains no source entries")

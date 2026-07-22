@@ -70,6 +70,17 @@ Freshness window: 180 days.
         self.assertIn("malformed Official URL", result.stdout)
         self.assertIn("missing Last verified", result.stdout)
 
+    def test_future_last_verified_date_fails(self) -> None:
+        root = self.write_repository(
+            valid_ledger(last_verified="2099-01-01"),
+            "Example guidance. [SRC-TEST]\n",
+        )
+
+        result = self.run_validator(root)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("SRC-TEST: Last verified date is in the future", result.stdout)
+
     def test_malformed_source_headings_fail(self) -> None:
         for source_id in ("src-test", "SRC--TEST"):
             with self.subTest(source_id=source_id):
